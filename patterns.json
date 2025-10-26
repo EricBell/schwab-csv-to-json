@@ -1,0 +1,6 @@
+{
+  "(?i)^,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type": "Filled Orders",
+  "(?i)^,Working Orders": "Working Orders",
+  "(?i)^,Canceled Orders": "Canceled Orders",
+  "(?i)^,Rolling Strategies": "Rolling Strategies"
+}
