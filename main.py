@@ -22,7 +22,7 @@ def detect_section_from_row(row):
         if pat.search(joined):
             return sec_name
     # fallback heuristics:
-    if any('Exec Time' in field or 'Price Improvement' in field for field in row):
+    if any(field and ('Exec Time' in field or 'Price Improvement' in field) for field in row):
         return 'Filled Orders'  # heuristic
     return None
 
