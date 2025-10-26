@@ -75,11 +75,12 @@ def convert_csv_to_ndjson(input_file, output_file):
                 # Map header -> value by index (safe for different lengths)
                 parsed = {}
                 for i, h in enumerate(hdr):
+                    header_name = h.strip() if h else f"col{i}"
                     if i < len(row):
-                        parsed[h.strip()] = row[i]
+                        parsed[header_name] = row[i]
                     else:
-                        parsed[h.strip()] = None
-                        issues.append("missing_field_for_header:" + (h.strip() or f"col{i}"))
+                        parsed[header_name] = None
+                        issues.append(f"missing_field_for_header:{header_name}")
                 # If row longer than header, keep extra fields as raw tail
                 if len(row) > len(hdr):
                     parsed["_extra"] = row[len(hdr):]
