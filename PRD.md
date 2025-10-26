@@ -159,7 +159,38 @@ Expected fields:
 <!-- Define expected fields -->
 
 #### Canceled Orders Section
-<!-- Define expected fields -->
+```
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,(Order Type),TIF,Status
+```
+
+Expected fields:
+- **Notes**: Free-form text field (typically empty in exports)
+- **Time Canceled**: Cancellation timestamp (e.g., "10/24/25 09:51:36")
+- **Spread**: Order spread type (STOCK, VERTICAL, IRON CONDOR, etc.)
+- **Side**: BUY or SELL
+- **Qty**: Quantity (integer, may be signed with +/-)
+- **Pos Effect**: Position effect (TO OPEN, TO CLOSE)
+- **Symbol**: Stock/option symbol
+- **Exp**: Option expiration date (empty for stocks)
+- **Strike**: Option strike price (empty for stocks)
+- **Type**: Instrument type (STOCK, CALL, PUT, etc.)
+- **PRICE**: Limit or stop price (uppercase in header; "~" for market orders without limit)
+- **(Order Type)**: Order type (MKT, LMT, STP) - **Note: This column is unlabeled in the CSV header (appears as empty field)**
+- **TIF**: Time In Force (DAY, GTC, GTD, STD, etc.)
+- **Status**: Order status (always "CANCELED" in this section)
+
+**Key Differences from Filled Orders:**
+- Uses "Time Canceled" instead of "Exec Time"
+- Missing "Net Price" and "Price Improvement" (orders weren't executed)
+- Has "TIF" (Time In Force) field
+- Has "Status" field to indicate cancellation
+- Order Type column is unlabeled in header
+
+**Data Quality Notes:**
+- The "~" character represents market orders without limit prices
+- Some canceled orders span multiple CSV rows (e.g., stop-market orders may show the stop trigger price on a continuation row)
+- Multi-row orders: Lines 22-23, 24-25, 26-27 in example show this pattern where the second row contains additional stop price information
+- Continuation rows have most fields empty except PRICE, Order Type, and TIF fields
 
 ### Output: JSON Schema
 
@@ -231,6 +262,10 @@ python main.py <input.csv> <output.json>
 5. **Multiple sections with same name**:
    - Behavior: <!-- Process all with same section name? -->
 
+6. **Multi-row orders in Canceled Orders section**:
+   - Example: A stop-market order may have two CSV rows: first with order details, second with stop trigger price
+   - Behavior: <!-- Should we merge these into a single JSON record? Treat as separate records? Add a flag indicating continuation row? -->
+
 ### Error Conditions
 <!-- What should cause the program to fail vs. warn? -->
 
@@ -295,6 +330,8 @@ python main.py <input.csv> <output.json>
 
 ### Example Input
 <!-- Paste a small sample of actual Schwab CSV -->
+
+**Filled Orders Example:**
 ```csv
 Today's Trade Activity for 7044 (Individual) on 10/24/25 18:45:11
 
@@ -302,6 +339,17 @@ Filled Orders
 ,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
 ,,10/24/25 09:51:38,STOCK,SELL,-75,TO CLOSE,NEUP,,,STOCK,8.30,8.30,-,MKT
 ```
+
+**Canceled Orders Example:**
+```csv
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,10/24/25 09:51:36,STOCK,SELL,-75,TO CLOSE,NEUP,,,STOCK,8.51,LMT,DAY,CANCELED
+,,10/24/25 09:50:58,STOCK,BUY,+25,TO OPEN,NEUP,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,8.47,STP,STD,
+```
+
+**Note:** The last two rows show a multi-row order where the second row (line 3) contains the stop trigger price (8.47) for the market order in the previous row (line 2).
 
 ### Example Output
 <!-- Paste expected JSON output for the sample input -->
