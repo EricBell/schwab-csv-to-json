@@ -3,9 +3,10 @@
 convert_to_flat_ndjson_cli.py
 
 Convert a Schwab-style CSV (multiple sections) into a flat NDJSON file.
-Produces one JSON object per data row with canonical keys:
-  section,row_index,exec_time,side,qty,pos_effect,symbol,price,net_price,
-  price_improvement,order_type,raw,issues
+Produces one JSON object per data row with canonical keys (unified schema for all sections):
+  section, row_index, exec_time, time_canceled, time_placed, side, qty, pos_effect,
+  symbol, exp, strike, type, spread, price, net_price, price_improvement, order_type,
+  tif, status, notes, mark, raw, issues
 
 Usage examples:
   python convert_to_flat_ndjson_cli.py in.csv out.ndjson
@@ -24,27 +25,52 @@ from typing import Dict, List, Optional
 import click
 
 # Default section detection patterns (regex -> canonical name)
+# These match actual header rows from Schwab CSVs
 DEFAULT_SECTION_PATTERNS = {
-    r'(?i)^\s*,?\s*exec\s*time.*price.*order\s*type': 'Filled Orders',
-    r'(?i)^\s*,?\s*working\s*orders': 'Working Orders',
-    r'(?i)^\s*,?\s*canceled|cancelled\s*orders': 'Canceled Orders',
-    r'(?i)^\s*,?\s*rolling\s*strategies': 'Rolling Strategies',
-    r'(?i)^\s*,?\s*header': 'Header',
-    # fallback pattern for top-of-file metadata
+    # Filled Orders: matches header row with exec time, price, net price, price improvement, order type
+    r'(?i)^,+exec\s*time.*spread.*side.*qty.*pos\s*effect.*symbol.*price.*net\s*price.*price\s*improvement.*order\s*type': 'Filled Orders',
+    # Canceled Orders: matches header row with notes, time canceled, PRICE (uppercase), TIF, status
+    r'(?i)^notes,+time\s*canceled.*spread.*side.*qty.*pos\s*effect.*symbol.*price,+tif.*status': 'Canceled Orders',
+    # Working Orders: matches header row with notes, time placed, PRICE, TIF, mark, status
+    r'(?i)^notes,+time\s*placed.*spread.*side.*qty.*pos\s*effect.*symbol.*price,+tif.*mark.*status': 'Working Orders',
+    # Rolling Strategies: matches header row
+    r'(?i)^covered\s*call\s*position.*new\s*exp.*call\s*by.*begin.*order\s*price.*active\s*time': 'Rolling Strategies',
+    # Fallback patterns for section name rows (less specific)
+    r'(?i)^\s*,?\s*filled\s*orders\s*$': 'Filled Orders',
+    r'(?i)^\s*,?\s*canceled|cancelled\s*orders\s*$': 'Canceled Orders',
+    r'(?i)^\s*,?\s*working\s*orders\s*$': 'Working Orders',
+    r'(?i)^\s*,?\s*rolling\s*strategies\s*$': 'Rolling Strategies',
+    # Top-of-file metadata
     r'(?i)^\s*,?\s*account|today\'s trade activity': 'Top'
 }
 
-# Column alias map -> flat keys
+# Column alias map -> flat keys (unified schema for all sections)
 COL_ALIASES = {
+    # Time fields
     'exec time': 'exec_time', 'execution time': 'exec_time', 'time': 'exec_time',
+    'time canceled': 'time_canceled', 'time cancelled': 'time_canceled',
+    'time placed': 'time_placed',
+    # Trade fields
     'side': 'side',
     'qty': 'qty', 'quantity': 'qty',
     'pos effect': 'pos_effect', 'position effect': 'pos_effect',
     'symbol': 'symbol', 'underlying': 'symbol',
+    # Option fields
+    'exp': 'exp', 'expiration': 'exp',
+    'strike': 'strike', 'strike price': 'strike',
+    'type': 'type',
+    'spread': 'spread',
+    # Price fields
     'price': 'price',
     'net price': 'net_price', 'netprice': 'net_price',
     'price improvement': 'price_improvement', 'price_impr': 'price_improvement',
-    'order type': 'order_type', 'ordertype': 'order_type'
+    # Order fields
+    'order type': 'order_type', 'ordertype': 'order_type',
+    'tif': 'tif', 'time in force': 'tif',
+    'status': 'status',
+    # Other fields
+    'notes': 'notes', 'note': 'notes',
+    'mark': 'mark'
 }
 
 
@@ -61,12 +87,20 @@ def normalize_key(k: Optional[str]) -> str:
 
 
 def map_header_to_index(header_row: List[str]) -> Dict[str, int]:
+    """
+    Map header row to field indices.
+    Sorts aliases by length (longest first) to ensure more specific matches take priority.
+    E.g., "time canceled" should match before "time", "net price" before "price".
+    """
     mapping: Dict[str, int] = {}
+    # Sort aliases by length descending - longer/more specific matches first
+    sorted_aliases = sorted(COL_ALIASES.items(), key=lambda x: len(x[0]), reverse=True)
+
     for i, h in enumerate(header_row):
         nk = normalize_key(h)
         if not nk:
             continue
-        for alias, flat in COL_ALIASES.items():
+        for alias, flat in sorted_aliases:
             if alias in nk:
                 mapping[flat] = i
                 break
@@ -74,13 +108,21 @@ def map_header_to_index(header_row: List[str]) -> Dict[str, int]:
 
 
 def safe_get(row: List[str], idx: Optional[int]) -> Optional[str]:
+    """
+    Safely get a value from a row by index.
+    Returns None for: missing index, out of bounds, empty strings, or special placeholders.
+    Special placeholders per PRD: "~" and "-" represent missing values.
+    """
     if idx is None:
         return None
     if idx < 0:
         return None
     if idx < len(row):
         v = row[idx].strip()
-        return v if v != "" else None
+        # Treat empty, "~", and "-" as null (per PRD)
+        if v == "" or v == "~" or v == "-":
+            return None
+        return v
     return None
 
 
@@ -187,15 +229,31 @@ def main(input_csv, output_json, encoding, output_ndjson, pretty, preview, max_r
                     obj_hdr = {
                         "section": current_section,
                         "row_index": row_index,
+                        # Time fields
                         "exec_time": None,
+                        "time_canceled": None,
+                        "time_placed": None,
+                        # Trade fields
                         "side": None,
                         "qty": None,
                         "pos_effect": None,
                         "symbol": None,
+                        # Option fields
+                        "exp": None,
+                        "strike": None,
+                        "type": None,
+                        "spread": None,
+                        # Price fields
                         "price": None,
                         "net_price": None,
                         "price_improvement": None,
+                        # Order fields
                         "order_type": None,
+                        "tif": None,
+                        "status": None,
+                        # Other fields
+                        "notes": None,
+                        "mark": None,
                         "raw": ",".join([c if c is not None else "" for c in row]),
                         "issues": ["section_header"]
                     }
@@ -206,20 +264,43 @@ def main(input_csv, output_json, encoding, output_ndjson, pretty, preview, max_r
                         out_records.append(obj_hdr)
                     continue
 
-                # Map fields based on header_map if available
+                # Map fields based on header_map if available (unified schema)
                 issues: List[str] = []
-                exec_time = side = qty_raw = pos_effect = symbol = price = net_price = price_improvement = order_type = None
+
+                # Initialize all fields to None
+                exec_time = time_canceled = time_placed = None
+                side = qty_raw = pos_effect = symbol = None
+                exp = strike = type_field = spread = None
+                price = net_price = price_improvement = None
+                order_type = tif = status = None
+                notes = mark = None
 
                 if header_map:
+                    # Time fields
                     exec_time = safe_get(row, header_map.get('exec_time'))
+                    time_canceled = safe_get(row, header_map.get('time_canceled'))
+                    time_placed = safe_get(row, header_map.get('time_placed'))
+                    # Trade fields
                     side = safe_get(row, header_map.get('side'))
                     qty_raw = safe_get(row, header_map.get('qty'))
                     pos_effect = safe_get(row, header_map.get('pos_effect'))
                     symbol = safe_get(row, header_map.get('symbol'))
+                    # Option fields
+                    exp = safe_get(row, header_map.get('exp'))
+                    strike = safe_get(row, header_map.get('strike'))
+                    type_field = safe_get(row, header_map.get('type'))
+                    spread = safe_get(row, header_map.get('spread'))
+                    # Price fields
                     price = safe_get(row, header_map.get('price'))
                     net_price = safe_get(row, header_map.get('net_price'))
                     price_improvement = safe_get(row, header_map.get('price_improvement'))
+                    # Order fields
                     order_type = safe_get(row, header_map.get('order_type'))
+                    tif = safe_get(row, header_map.get('tif'))
+                    status = safe_get(row, header_map.get('status'))
+                    # Other fields
+                    notes = safe_get(row, header_map.get('notes'))
+                    mark = safe_get(row, header_map.get('mark'))
                 else:
                     # Heuristic fallback when no header for this section has been captured
                     if len(row) >= 14:
@@ -260,15 +341,31 @@ def main(input_csv, output_json, encoding, output_ndjson, pretty, preview, max_r
                 obj = {
                     "section": current_section,
                     "row_index": row_index,
+                    # Time fields
                     "exec_time": exec_time,
+                    "time_canceled": time_canceled,
+                    "time_placed": time_placed,
+                    # Trade fields
                     "side": side,
                     "qty": qty,
                     "pos_effect": pos_effect,
                     "symbol": symbol,
+                    # Option fields
+                    "exp": exp,
+                    "strike": strike,
+                    "type": type_field,
+                    "spread": spread,
+                    # Price fields
                     "price": price_f,
                     "net_price": net_price_f,
                     "price_improvement": price_impr_f,
+                    # Order fields
                     "order_type": order_type,
+                    "tif": tif,
+                    "status": status,
+                    # Other fields
+                    "notes": notes,
+                    "mark": mark,
                     "raw": ",".join([c if c is not None else "" for c in row]),
                     "issues": issues
                 }

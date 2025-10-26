@@ -310,7 +310,7 @@ class TestOutputFormat:
         self.runner = CliRunner()
 
     def test_output_has_required_fields(self):
-        """Test that output has all required fields."""
+        """Test that output has all required fields from unified schema."""
         with self.runner.isolated_filesystem():
             with open('test_input.csv', 'w') as f:
                 f.write(',,Exec Time,Side,Qty,Symbol,Price\n')
@@ -320,12 +320,27 @@ class TestOutputFormat:
 
             assert result.exit_code == 0
 
-            required_fields = ['section', 'row_index', 'raw', 'issues']
+            # All fields that should be in the unified schema
+            required_fields = [
+                'section', 'row_index', 'raw', 'issues',
+                # Time fields
+                'exec_time', 'time_canceled', 'time_placed',
+                # Trade fields
+                'side', 'qty', 'pos_effect', 'symbol',
+                # Option fields
+                'exp', 'strike', 'type', 'spread',
+                # Price fields
+                'price', 'net_price', 'price_improvement',
+                # Order fields
+                'order_type', 'tif', 'status',
+                # Other fields
+                'notes', 'mark'
+            ]
             with open('output.ndjson', 'r') as f:
                 for line in f:
                     obj = json.loads(line)
                     for field in required_fields:
-                        assert field in obj
+                        assert field in obj, f"Field '{field}' missing from output"
 
     def test_raw_field_preserves_original(self):
         """Test that raw field preserves original CSV row."""
@@ -360,3 +375,45 @@ class TestOutputFormat:
                     obj = json.loads(line)
                     assert 'issues' in obj
                     assert isinstance(obj['issues'], list)
+
+    def test_canceled_orders_section_mapping(self):
+        """Test that Canceled Orders section is properly mapped to unified schema."""
+        with self.runner.isolated_filesystem():
+            with open('test_input.csv', 'w') as f:
+                f.write('Canceled Orders\n')
+                f.write('Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status\n')
+                f.write(',,10/24/25 09:51:36,STOCK,SELL,-75,TO CLOSE,NEUP,,,STOCK,8.51,LMT,DAY,CANCELED\n')
+                f.write(',,10/24/25 09:50:58,STOCK,BUY,+25,TO OPEN,NEUP,,,STOCK,~,MKT,DAY,CANCELED\n')
+
+            result = self.runner.invoke(main, ['test_input.csv', 'output.ndjson'])
+
+            assert result.exit_code == 0
+
+            # Verify canceled orders data
+            records = []
+            with open('output.ndjson', 'r') as f:
+                for line in f:
+                    obj = json.loads(line)
+                    if obj.get('section') == 'Canceled Orders' and 'section_header' not in obj.get('issues', []):
+                        records.append(obj)
+
+            # Should have 2 data records
+            assert len(records) >= 2
+
+            # Check first canceled order
+            rec1 = records[0]
+            assert rec1['section'] == 'Canceled Orders'
+            assert rec1['time_canceled'] == '10/24/25 09:51:36'
+            assert rec1['side'] == 'SELL'
+            assert rec1['qty'] == -75
+            assert rec1['symbol'] == 'NEUP'
+            assert rec1['price'] == 8.51
+            assert rec1['tif'] == 'DAY'
+            assert rec1['status'] == 'CANCELED'
+            # These should be null for canceled orders
+            assert rec1['net_price'] is None
+            assert rec1['price_improvement'] is None
+
+            # Check second canceled order (with ~ for price)
+            rec2 = records[1]
+            assert rec2['price'] is None  # ~ should be treated as null

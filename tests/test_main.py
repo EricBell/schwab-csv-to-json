@@ -102,6 +102,46 @@ class TestMapHeaderToIndex:
         # Verify we can map price-related headers
         assert any(key in result for key in ['price', 'net_price', 'price_improvement'])
 
+    def test_map_canceled_orders_header(self):
+        """Test mapping of Canceled Orders section header."""
+        header = ['Notes', '', 'Time Canceled', 'Spread', 'Side', 'Qty', 'Pos Effect',
+                  'Symbol', 'Exp', 'Strike', 'Type', 'PRICE', '', 'TIF', 'Status']
+        result = map_header_to_index(header)
+        # Should map all expected fields
+        assert 'notes' in result
+        assert 'time_canceled' in result
+        assert 'spread' in result
+        assert 'side' in result
+        assert 'qty' in result
+        assert 'pos_effect' in result
+        assert 'symbol' in result
+        assert 'exp' in result
+        assert 'strike' in result
+        assert 'type' in result
+        assert 'price' in result
+        assert 'tif' in result
+        assert 'status' in result
+
+    def test_map_filled_orders_header(self):
+        """Test mapping of Filled Orders section header."""
+        header = ['', '', 'Exec Time', 'Spread', 'Side', 'Qty', 'Pos Effect',
+                  'Symbol', 'Exp', 'Strike', 'Type', 'Price', 'Net Price', 'Price Improvement', 'Order Type']
+        result = map_header_to_index(header)
+        # Should map all expected fields
+        assert 'exec_time' in result
+        assert 'spread' in result
+        assert 'side' in result
+        assert 'qty' in result
+        assert 'pos_effect' in result
+        assert 'symbol' in result
+        assert 'exp' in result
+        assert 'strike' in result
+        assert 'type' in result
+        assert 'price' in result
+        assert 'net_price' in result
+        assert 'price_improvement' in result
+        assert 'order_type' in result
+
 
 class TestSafeGet:
     """Test safe row access function."""
@@ -133,6 +173,26 @@ class TestSafeGet:
     def test_safe_get_strips_whitespace(self):
         row = ['  value1  ', 'value2']
         assert safe_get(row, 0) == 'value1'
+
+    def test_safe_get_tilde_as_null(self):
+        """Test that '~' is treated as null (per PRD)."""
+        row = ['value1', '~', 'value3']
+        assert safe_get(row, 1) is None
+
+    def test_safe_get_dash_as_null(self):
+        """Test that '-' is treated as null (per PRD)."""
+        row = ['value1', '-', 'value3']
+        assert safe_get(row, 1) is None
+
+    def test_safe_get_tilde_with_whitespace(self):
+        """Test that '~' with whitespace is treated as null."""
+        row = ['value1', '  ~  ', 'value3']
+        assert safe_get(row, 1) is None
+
+    def test_safe_get_dash_with_whitespace(self):
+        """Test that '-' with whitespace is treated as null."""
+        row = ['value1', '  -  ', 'value3']
+        assert safe_get(row, 1) is None
 
 
 class TestDetectSectionFromRow:
@@ -332,6 +392,56 @@ class TestColAliases:
         assert 'price' in COL_ALIASES
         assert 'net price' in COL_ALIASES
         assert 'price improvement' in COL_ALIASES
+
+    def test_time_canceled_alias(self):
+        """Test that Time Canceled maps to time_canceled field."""
+        assert 'time canceled' in COL_ALIASES
+        assert COL_ALIASES['time canceled'] == 'time_canceled'
+
+    def test_time_placed_alias(self):
+        """Test that Time Placed maps to time_placed field."""
+        assert 'time placed' in COL_ALIASES
+        assert COL_ALIASES['time placed'] == 'time_placed'
+
+    def test_notes_alias(self):
+        """Test that Notes maps to notes field."""
+        assert 'notes' in COL_ALIASES
+        assert COL_ALIASES['notes'] == 'notes'
+
+    def test_spread_alias(self):
+        """Test that Spread maps to spread field."""
+        assert 'spread' in COL_ALIASES
+        assert COL_ALIASES['spread'] == 'spread'
+
+    def test_exp_alias(self):
+        """Test that Exp maps to exp field."""
+        assert 'exp' in COL_ALIASES
+        assert COL_ALIASES['exp'] == 'exp'
+
+    def test_strike_alias(self):
+        """Test that Strike maps to strike field."""
+        assert 'strike' in COL_ALIASES
+        assert COL_ALIASES['strike'] == 'strike'
+
+    def test_type_alias(self):
+        """Test that Type maps to type field."""
+        assert 'type' in COL_ALIASES
+        assert COL_ALIASES['type'] == 'type'
+
+    def test_tif_alias(self):
+        """Test that TIF maps to tif field."""
+        assert 'tif' in COL_ALIASES
+        assert COL_ALIASES['tif'] == 'tif'
+
+    def test_status_alias(self):
+        """Test that Status maps to status field."""
+        assert 'status' in COL_ALIASES
+        assert COL_ALIASES['status'] == 'status'
+
+    def test_mark_alias(self):
+        """Test that Mark maps to mark field."""
+        assert 'mark' in COL_ALIASES
+        assert COL_ALIASES['mark'] == 'mark'
 
 
 class TestDefaultSectionPatterns:
