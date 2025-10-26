@@ -10,13 +10,46 @@
 ## 1. Overview
 
 ### Problem Statement
-<!-- Describe the problem this tool solves. What pain points does it address? -->
+
+Schwab's trade activity CSV exports are difficult to work with programmatically because:
+
+1. **Multi-section format**: A single CSV file contains multiple logical sections (Filled Orders, Working Orders, Canceled Orders, Rolling Strategies), each with its own header row. Standard CSV parsers treat these as malformed data.
+
+2. **Inconsistent structure**: Different sections have different columns, making it impossible to use generic CSV-to-JSON converters without losing information or creating errors.
+
+3. **Data quality issues**: The CSV contains:
+   - Empty/placeholder rows between sections
+   - Missing values represented as "-" or "~"
+   - Leading empty columns (commas with no data)
+   - Inconsistent field formatting (quantities with +/- signs, prices with/without $)
+
+4. **Analysis friction**: Users need to:
+   - Manually identify section boundaries
+   - Write custom parsers for each section type
+   - Handle edge cases (empty fields, malformed rows)
+   - Track which rows failed to parse
+
+This makes it time-consuming to analyze trade history, calculate P&L, or feed data into other tools.
 
 ### Goal
-<!-- What is the primary goal of this tool? What should users be able to accomplish? -->
+
+Create a **zero-configuration CLI tool** that converts Schwab trade activity CSV files into clean, structured JSON (NDJSON or JSON array) with:
+
+- Automatic section detection
+- Normalized field names across all sections
+- Proper type conversion (strings → numbers where appropriate)
+- Complete data preservation (raw CSV always included)
+- Clear error tracking (which fields failed to parse)
+
+Users should be able to run one command and get analysis-ready JSON output.
 
 ### Non-Goals
-<!-- What is explicitly out of scope for this tool? -->
+
+- **Not a trading platform**: Does not execute trades or connect to Schwab APIs
+- **Not a tax calculator**: Does not calculate cost basis, wash sales, or tax lots
+- **Not a portfolio tracker**: Does not maintain state across multiple CSV files
+- **Not a data validator**: Does not validate if the trades are correct/valid, only parses what's present
+- **Not a GUI application**: Command-line only (no web interface or desktop app)
 
 ---
 
