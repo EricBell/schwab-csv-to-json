@@ -80,6 +80,17 @@ uv run pytest -v                 # Verbose output
 uv run pytest -k test_name       # Run specific test by name
 ```
 
+### Multi-File TUI Feature Development
+
+**IMPORTANT**: All work on the multi-file TUI feature (adding Textual-based TUI, batch processing, merged output) MUST follow strict TDD methodology. See `Tasks.md` for the complete implementation checklist with all phases and tasks.
+
+Key TDD requirements for this feature:
+- Write tests BEFORE implementing each function or feature
+- Ensure all existing tests pass before adding new functionality
+- Add unit tests for all helper functions
+- Add integration tests for batch processing and TUI workflows
+- Never skip the red-green-refactor cycle
+
 ## Important Implementation Details
 
 **Null Handling**: The code normalizes empty CSV cells to `None` early in processing. Always check if values are truthy before calling string methods like `.strip()` or using `in` operator to avoid `NoneType` errors.
