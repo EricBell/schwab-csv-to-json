@@ -1,420 +1,312 @@
+
 #!/usr/bin/env python3
-"""
-convert_to_flat_ndjson_cli.py
+# -*- coding: utf-8 -*-
 
-Convert a Schwab-style CSV (multiple sections) into a flat NDJSON file.
-Produces one JSON object per data row with canonical keys (unified schema for all sections):
-  section, row_index, exec_time, time_canceled, time_placed, side, qty, pos_effect,
-  symbol, exp, strike, type, spread, price, net_price, price_improvement, order_type,
-  tif, status, notes, mark, raw, issues
+import argparse, csv, json, re, sys
+from datetime import datetime
+from typing import List, Dict, Any, Optional
 
-Usage examples:
-  python convert_to_flat_ndjson_cli.py in.csv out.ndjson
-  python convert_to_flat_ndjson_cli.py in.csv out.ndjson --pretty
-  python convert_to_flat_ndjson_cli.py in.csv out.ndjson --preview 20
-
-See --help for all options.
-"""
-from __future__ import annotations
-import csv
-import json
-import re
-import sys
-import logging
-from typing import Dict, List, Optional
-import click
-
-# Default section detection patterns (regex -> canonical name)
-# These match actual header rows from Schwab CSVs
-DEFAULT_SECTION_PATTERNS = {
-    # Filled Orders: matches header row with exec time, price, net price, price improvement, order type
-    r'(?i)^,+exec\s*time.*spread.*side.*qty.*pos\s*effect.*symbol.*price.*net\s*price.*price\s*improvement.*order\s*type': 'Filled Orders',
-    # Canceled Orders: matches header row with notes, time canceled, PRICE (uppercase), TIF, status
-    r'(?i)^notes,+time\s*canceled.*spread.*side.*qty.*pos\s*effect.*symbol.*price,+tif.*status': 'Canceled Orders',
-    # Working Orders: matches header row with notes, time placed, PRICE, TIF, mark, status
-    r'(?i)^notes,+time\s*placed.*spread.*side.*qty.*pos\s*effect.*symbol.*price,+tif.*mark.*status': 'Working Orders',
-    # Rolling Strategies: matches header row
-    r'(?i)^covered\s*call\s*position.*new\s*exp.*call\s*by.*begin.*order\s*price.*active\s*time': 'Rolling Strategies',
-    # Fallback patterns for section name rows (less specific)
-    r'(?i)^\s*,?\s*filled\s*orders\s*$': 'Filled Orders',
-    r'(?i)^\s*,?\s*canceled|cancelled\s*orders\s*$': 'Canceled Orders',
-    r'(?i)^\s*,?\s*working\s*orders\s*$': 'Working Orders',
-    r'(?i)^\s*,?\s*rolling\s*strategies\s*$': 'Rolling Strategies',
-    # Top-of-file metadata
-    r'(?i)^\s*,?\s*account|today\'s trade activity': 'Top'
+SECTIONS = {
+    "TOP": "Top",
+    "WORKING": "Working Orders",
+    "FILLED": "Filled Orders",
+    "CANCELED": "Canceled Orders",
+    "ROLLING": "Rolling Strategies",
 }
 
-# Column alias map -> flat keys (unified schema for all sections)
-COL_ALIASES = {
-    # Time fields
-    'exec time': 'exec_time', 'execution time': 'exec_time', 'time': 'exec_time',
-    'time canceled': 'time_canceled', 'time cancelled': 'time_canceled',
-    'time placed': 'time_placed',
-    # Trade fields
-    'side': 'side',
-    'qty': 'qty', 'quantity': 'qty',
-    'pos effect': 'pos_effect', 'position effect': 'pos_effect',
-    'symbol': 'symbol', 'underlying': 'symbol',
-    # Option fields
-    'exp': 'exp', 'expiration': 'exp',
-    'strike': 'strike', 'strike price': 'strike',
-    'type': 'type',
-    'spread': 'spread',
-    # Price fields
-    'price': 'price',
-    'net price': 'net_price', 'netprice': 'net_price',
-    'price improvement': 'price_improvement', 'price_impr': 'price_improvement',
-    # Order fields
-    'order type': 'order_type', 'ordertype': 'order_type',
-    'tif': 'tif', 'time in force': 'tif',
-    'status': 'status',
-    # Other fields
-    'notes': 'notes', 'note': 'notes',
-    'mark': 'mark'
+SECTION_HEADERS_HINTS = {
+    SECTIONS["WORKING"]: ["Time Placed"],
+    SECTIONS["FILLED"]: ["Exec Time"],
+    SECTIONS["CANCELED"]: ["Time Canceled"],
+    SECTIONS["ROLLING"]: ["Covered Call Position", "Rolling"],
 }
 
+NUMERIC_RE = re.compile(r'^-?\d+(?:\.\d+)?$')
+PRICE_LIKE_RE = re.compile(r'^\.?-?\d+(?:\.\d+)?$')
+AMEND_REF_RE = re.compile(r'^RE\s*#\s*(\d+)', re.IGNORECASE)
 
-def compile_section_patterns(patterns: Dict[str, str]):
-    return [(re.compile(pat), name) for pat, name in patterns.items()]
+MONTH_MAP = {
+    'JAN':'01','FEB':'02','MAR':'03','APR':'04','MAY':'05','JUN':'06',
+    'JUL':'07','AUG':'08','SEP':'09','OCT':'10','NOV':'11','DEC':'12'
+}
 
+def normalize_header_key(s: str) -> str:
+    s = (s or "").strip()
+    s = re.sub(r'[\s/]+', '_', s.lower())
+    s = re.sub(r'[^a-z0-9_]+', '', s)
+    return s
 
-def normalize_key(k: Optional[str]) -> str:
-    if not k:
-        return ""
-    k2 = k.strip().lower().replace('\ufeff', '')
-    k2 = re.sub(r'\s+', ' ', k2)
-    return k2
-
-
-def map_header_to_index(header_row: List[str]) -> Dict[str, int]:
-    """
-    Map header row to field indices.
-    Sorts aliases by length (longest first) to ensure more specific matches take priority.
-    E.g., "time canceled" should match before "time", "net price" before "price".
-    """
-    mapping: Dict[str, int] = {}
-    # Sort aliases by length descending - longer/more specific matches first
-    sorted_aliases = sorted(COL_ALIASES.items(), key=lambda x: len(x[0]), reverse=True)
-
-    for i, h in enumerate(header_row):
-        nk = normalize_key(h)
-        if not nk:
-            continue
-        for alias, flat in sorted_aliases:
-            if alias in nk:
-                mapping[flat] = i
-                break
-    return mapping
-
-
-def safe_get(row: List[str], idx: Optional[int]) -> Optional[str]:
-    """
-    Safely get a value from a row by index.
-    Returns None for: missing index, out of bounds, empty strings, or special placeholders.
-    Special placeholders per PRD: "~" and "-" represent missing values.
-    """
-    if idx is None:
-        return None
-    if idx < 0:
-        return None
-    if idx < len(row):
-        v = row[idx].strip()
-        # Treat empty, "~", and "-" as null (per PRD)
-        if v == "" or v == "~" or v == "-":
-            return None
-        return v
-    return None
-
-
-def detect_section_from_row(row: List[str], compiled_patterns) -> Optional[str]:
-    joined = ",".join([ (c or "").strip() for c in row ])
-    for pat, name in compiled_patterns:
-        if pat.search(joined):
-            return name
-    return None
-
-
-def parse_integer_qty(q_raw: Optional[str], issues: List[str]) -> Optional[int]:
-    if q_raw is None:
-        return None
-    s = q_raw.strip()
-    if s == "":
-        return None
-    # Remove + and commas, keep sign if present
-    s_clean = s.replace('+', '').replace(',', '')
-    try:
-        q = int(s_clean)
-        if q_raw.strip().startswith('-'):
-            q = -abs(q)
-        return q
-    except Exception:
-        issues.append('qty_parse_failed')
-        return q_raw  # return raw if can't parse
-
-
-def parse_float_field(v: Optional[str], name: str, issues: List[str]) -> Optional[float]:
-    if v is None:
-        return None
-    try:
-        return float(v.replace(',', '').replace('$', ''))
-    except Exception:
-        issues.append(f'{name}_parse_failed')
-        return None
-
-
-@click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('input_csv', type=click.Path(exists=True, dir_okay=False))
-@click.argument('output_json', type=click.Path(dir_okay=False))
-@click.option('--encoding', default='utf-8', show_default=True, help='File encoding for input CSV')
-@click.option('--output-ndjson/--output-json', default=True, help='Write newline-delimited JSON (default) or a single JSON array')
-@click.option('--pretty', is_flag=True, help='Pretty-print JSON (only applies to single JSON array mode)')
-@click.option('--preview', type=int, default=0, help='Print preview of first N output records to stdout after conversion')
-@click.option('--max-rows', type=int, default=0, help='Only process first N CSV records (0 = all)')
-@click.option('--qty-signed/--qty-unsigned', default=True, help='Treat qty with sign (True keeps negative for sells)')
-@click.option('--verbose', is_flag=True, help='Enable debug logging')
-@click.option('--section-patterns-file', type=click.Path(exists=True, dir_okay=False),
-              help='Optional JSON file mapping regex->section name to override defaults')
-def main(input_csv, output_json, encoding, output_ndjson, pretty, preview, max_rows, qty_signed, verbose, section_patterns_file):
-    """
-    Convert SECTIONED CSV -> flat NDJSON / JSON.
-
-    INPUT_CSV: path to Schwab CSV
-    OUTPUT_JSON: destination NDJSON or JSON file
-    """
-    log_level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(level=log_level, format='%(levelname)s: %(message)s')
-
-    # Load custom section patterns if provided
-    section_patterns = DEFAULT_SECTION_PATTERNS.copy()
-    if section_patterns_file:
+def parse_datetime_maybe(s: Optional[str]) -> Optional[str]:
+    if not s: return None
+    s = s.strip()
+    fmts = [
+        "%m/%d/%y %H:%M:%S",
+        "%m/%d/%Y %H:%M:%S",
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%dT%H:%M:%S",
+    ]
+    for fmt in fmts:
         try:
-            with open(section_patterns_file, 'r', encoding='utf-8') as pf:
-                custom = json.load(pf)
-                if isinstance(custom, dict):
-                    section_patterns.update(custom)
-                    logging.debug("Loaded custom section patterns from %s", section_patterns_file)
-                else:
-                    logging.warning("Custom patterns file does not contain a JSON object; ignoring")
-        except Exception as e:
-            logging.error("Failed to load section patterns file: %s", e)
-            sys.exit(1)
+            dt = datetime.strptime(s, fmt)
+            return dt.isoformat()
+        except Exception:
+            continue
+    return None
 
-    compiled_patterns = compile_section_patterns(section_patterns)
-
-    # State
-    current_section = 'Top'
-    section_header: Optional[List[str]] = None
-    header_map: Dict[str, int] = {}
-    row_index = 0
-    out_records = []  # used only if output_json (not ndjson)
-
-    # Streaming write for ndjson
-    fout = open(output_json, 'w', encoding='utf-8')
-
+def to_number(x: Optional[str]) -> Optional[float]:
+    if x is None: return None
+    sx = str(x).strip()
+    if sx in {"~","-",""}: return None
+    if sx.startswith(".") and sx != ".":
+        sx = "0" + sx
     try:
-        with open(input_csv, newline='', encoding=encoding, errors='replace') as fh:
-            reader = csv.reader(fh)
-            for row in reader:
-                row_index += 1
-                if max_rows and row_index > max_rows:
-                    break
+        return float(sx)
+    except Exception:
+        return None
 
-                # Detect section header row
-                sec = detect_section_from_row(row, compiled_patterns)
-                if sec:
-                    current_section = sec
-                    section_header = [c for c in row]
-                    header_map = map_header_to_index(section_header)
-                    # Emit optional marker for header row as a JSON object (section header flagged)
-                    obj_hdr = {
-                        "section": current_section,
-                        "row_index": row_index,
-                        # Time fields
-                        "exec_time": None,
-                        "time_canceled": None,
-                        "time_placed": None,
-                        # Trade fields
-                        "side": None,
-                        "qty": None,
-                        "pos_effect": None,
-                        "symbol": None,
-                        # Option fields
-                        "exp": None,
-                        "strike": None,
-                        "type": None,
-                        "spread": None,
-                        # Price fields
-                        "price": None,
-                        "net_price": None,
-                        "price_improvement": None,
-                        # Order fields
-                        "order_type": None,
-                        "tif": None,
-                        "status": None,
-                        # Other fields
-                        "notes": None,
-                        "mark": None,
-                        "raw": ",".join([c if c is not None else "" for c in row]),
-                        "issues": ["section_header"]
-                    }
-                    # Write header marker
-                    if output_ndjson:
-                        fout.write(json.dumps(obj_hdr, ensure_ascii=False) + "\n")
-                    else:
-                        out_records.append(obj_hdr)
-                    continue
+def parse_exp_date(exp: Optional[str]) -> Optional[str]:
+    if not exp: return None
+    exp = exp.strip().upper()
+    m = re.match(r'^(\d{1,2})\s+([A-Z]{3})\s+(\d{2,4})$', exp)
+    if not m: 
+        try:
+            return datetime.strptime(exp, "%Y-%m-%d").date().isoformat()
+        except Exception:
+            return None
+    day, mon3, yr = m.groups()
+    MONTH_MAP = {
+        'JAN':'01','FEB':'02','MAR':'03','APR':'04','MAY':'05','JUN':'06',
+        'JUL':'07','AUG':'08','SEP':'09','OCT':'10','NOV':'11','DEC':'12'
+    }
+    mon = MONTH_MAP.get(mon3)
+    if not mon: return None
+    if len(yr)==2:
+        yr = ("20" + yr) if int(yr) <= 69 else ("19" + yr)
+    return f"{yr}-{mon}-{int(day):02d}"
 
-                # Map fields based on header_map if available (unified schema)
-                issues: List[str] = []
+def classify_row(cells: List[str]) -> str:
+    if not cells or all((c.strip()=="" for c in cells)):
+        return "noise"
+    for c in cells:
+        if re.match(r'^RE\s*#\s*\d+', c.strip(), re.IGNORECASE):
+            return "amendment"
+    header_markers = {"exec time","time canceled","time placed","spread","side","qty","pos effect","symbol","type"}
+    joins = ",".join([normalize_header_key(c) for c in cells])
+    if any(h in joins for h in ["exec_time","time_canceled","time_placed"]) and "side" in joins and "qty" in joins:
+        return "header"
+    return "data"
 
-                # Initialize all fields to None
-                exec_time = time_canceled = time_placed = None
-                side = qty_raw = pos_effect = symbol = None
-                exp = strike = type_field = spread = None
-                price = net_price = price_improvement = None
-                order_type = tif = status = None
-                notes = mark = None
+def build_order_record(section: str, header: List[str], cells: List[str]) -> Optional[Dict[str,Any]]:
+    keymap = [normalize_header_key(h) for h in header]
+    values = { keymap[i]: (cells[i].strip() if i < len(cells) else "") for i in range(len(keymap)) }
 
-                if header_map:
-                    # Time fields
-                    exec_time = safe_get(row, header_map.get('exec_time'))
-                    time_canceled = safe_get(row, header_map.get('time_canceled'))
-                    time_placed = safe_get(row, header_map.get('time_placed'))
-                    # Trade fields
-                    side = safe_get(row, header_map.get('side'))
-                    qty_raw = safe_get(row, header_map.get('qty'))
-                    pos_effect = safe_get(row, header_map.get('pos_effect'))
-                    symbol = safe_get(row, header_map.get('symbol'))
-                    # Option fields
-                    exp = safe_get(row, header_map.get('exp'))
-                    strike = safe_get(row, header_map.get('strike'))
-                    type_field = safe_get(row, header_map.get('type'))
-                    spread = safe_get(row, header_map.get('spread'))
-                    # Price fields
-                    price = safe_get(row, header_map.get('price'))
-                    net_price = safe_get(row, header_map.get('net_price'))
-                    price_improvement = safe_get(row, header_map.get('price_improvement'))
-                    # Order fields
-                    order_type = safe_get(row, header_map.get('order_type'))
-                    tif = safe_get(row, header_map.get('tif'))
-                    status = safe_get(row, header_map.get('status'))
-                    # Other fields
-                    notes = safe_get(row, header_map.get('notes'))
-                    mark = safe_get(row, header_map.get('mark'))
-                else:
-                    # Heuristic fallback when no header for this section has been captured
-                    if len(row) >= 14:
-                        exec_time = row[0].strip() or None
-                        side = row[2].strip() if len(row) > 2 else None
-                        qty_raw = row[3].strip() if len(row) > 3 else None
-                        pos_effect = row[4].strip() if len(row) > 4 else None
-                        symbol = row[5].strip() if len(row) > 5 else None
-                        price = row[10].strip() if len(row) > 10 else None
-                        net_price = row[11].strip() if len(row) > 11 else None
-                        price_improvement = row[12].strip() if len(row) > 12 else None
-                        order_type = row[13].strip() if len(row) > 13 else None
-                    else:
-                        issues.append('no_header_map')
+    get = lambda *names: next((values.get(n) for n in names if n in values), None)
 
-                # Parse qty
-                if qty_signed:
-                    qty = parse_integer_qty(qty_raw, issues)
-                else:
-                    # unsigned: return absolute integer if parseable
-                    qty_val = parse_integer_qty(qty_raw, issues)
-                    if isinstance(qty_val, int):
-                        qty = abs(qty_val)
-                    else:
-                        qty = qty_val  # raw fallback
+    exec_time = get("exec_time")
+    time_canceled = get("time_canceled","time_cancelled")
+    spread = get("spread")
+    side = (get("side") or "").strip().upper() or None
+    qty_s = get("qty","quantity")
+    pos_effect = (get("pos_effect") or "").strip().upper() or None
+    symbol = (get("symbol") or "").strip().upper() or None
+    exp = get("exp","expiration")
+    strike_s = get("strike")
+    typ = (get("type","right","option_type") or "").strip().upper() or None
+    price_s = get("price","limit_price","exec_price")
+    net_price_s = get("net_price","net_price_")
+    price_impr_s = get("price_improvement","price_impr")
+    order_type = (get("order_type","ordertype","order_type_") or "").strip().upper() or None
+    tif = (get("tif","time_in_force") or "").strip().upper() or None
+    status = (get("status") or "").strip().upper() or None
+    notes = get("notes")
+    mark_s = get("mark")
 
-                # Parse numeric prices
-                price_f = parse_float_field(price, 'price', issues)
-                net_price_f = parse_float_field(net_price, 'net_price', issues)
-                price_impr_f = parse_float_field(price_improvement, 'price_improvement', issues)
+    if not side and not qty_s and not symbol and not typ:
+        return None
 
-                # If exec_time missing, fallback to first column
-                if not exec_time and len(row) > 0:
-                    candidate = row[0].strip()
-                    if candidate:
-                        exec_time = candidate
+    qty = to_number(qty_s)
+    if qty is not None:
+        qty_abs = abs(int(qty)) if float(qty).is_integer() else abs(float(qty))
+    else:
+        qty_abs = None
 
-                obj = {
-                    "section": current_section,
-                    "row_index": row_index,
-                    # Time fields
-                    "exec_time": exec_time,
-                    "time_canceled": time_canceled,
-                    "time_placed": time_placed,
-                    # Trade fields
-                    "side": side,
-                    "qty": qty,
-                    "pos_effect": pos_effect,
-                    "symbol": symbol,
-                    # Option fields
-                    "exp": exp,
-                    "strike": strike,
-                    "type": type_field,
-                    "spread": spread,
-                    # Price fields
-                    "price": price_f,
-                    "net_price": net_price_f,
-                    "price_improvement": price_impr_f,
-                    # Order fields
-                    "order_type": order_type,
-                    "tif": tif,
-                    "status": status,
-                    # Other fields
-                    "notes": notes,
-                    "mark": mark,
-                    "raw": ",".join([c if c is not None else "" for c in row]),
-                    "issues": issues
-                }
+    price = to_number(price_s)
+    net_price = to_number(net_price_s)
+    price_improvement = to_number(price_impr_s)
+    strike = to_number(strike_s)
+    mark = to_number(mark_s)
 
-                # Output
-                if output_ndjson:
-                    fout.write(json.dumps(obj, ensure_ascii=False) + "\n")
-                else:
-                    out_records.append(obj)
+    asset_type = "OPTION" if typ in {"CALL","PUT"} else ("STOCK" if typ=="STOCK" else None)
 
-    finally:
-        fout.close()
+    option = None
+    if asset_type == "OPTION":
+        option = {
+            "exp_date": parse_exp_date(exp),
+            "strike": strike,
+            "right": typ,
+        }
 
-    # If user requested a single JSON array output, write it (overwrite)
-    if not output_ndjson:
-        with open(output_json, 'w', encoding='utf-8') as f_arr:
-            if pretty:
-                json.dump(out_records, f_arr, ensure_ascii=False, indent=2)
-            else:
-                json.dump(out_records, f_arr, ensure_ascii=False)
+    if section == "Filled Orders":
+        event_type = "fill"
+    elif section == "Canceled Orders":
+        event_type = "cancel"
+    elif section == "Working Orders":
+        event_type = "working"
+    else:
+        event_type = "other"
 
-    # Preview if requested
-    if preview > 0:
-        click.echo("\nPreview of first {} output records:\n".format(preview))
-        # read back file and print first preview lines
-        with open(output_json, 'r', encoding='utf-8') as fpr:
-            count = 0
-            for line in fpr:
-                click.echo(line.rstrip())
-                count += 1
-                if count >= preview:
-                    break
+    rec = {
+        "section": section.lower().replace(" ", "_"),
+        "event_type": event_type,
+        "exec_time": parse_datetime_maybe(exec_time),
+        "time_canceled": parse_datetime_maybe(time_canceled),
+        "symbol": symbol,
+        "asset_type": asset_type,
+        "side": side,
+        "pos_effect": pos_effect,
+        "qty_abs": qty_abs,
+        "price": price,
+        "net_price": net_price,
+        "price_improvement": price_improvement,
+        "order_type": order_type,
+        "tif": tif,
+        "status": status,
+        "option": option,
+        "raw_cells": cells,
+    }
+    return rec
 
-    # Print counts per section (quick pass)
-    section_counts: Dict[str, int] = {}
-    with open(output_json, 'r', encoding='utf-8') as fcnt:
-        for line in fcnt:
+def build_amendment_record(section: str, cells: List[str]) -> Dict[str,Any]:
+    ref = None
+    stop_price = None
+    order_type = None
+    tif = None
+
+    for c in cells:
+        c_str = c.strip()
+        m = re.match(r'^RE\s*#\s*(\d+)', c_str, re.IGNORECASE)
+        if m:
+            ref = m.group(1)
+            continue
+        if stop_price is None and re.match(r'^\.?-?\d+(?:\.\d+)?$', c_str):
             try:
-                obj = json.loads(line)
-                sec = obj.get('section', 'Unknown') if isinstance(obj, dict) else 'Unknown'
-                section_counts[sec] = section_counts.get(sec, 0) + 1
+                stop_price = float(c_str if not c_str.startswith(".") else "0"+c_str)
             except Exception:
+                pass
+        if c_str.upper() in {"STP","STP LMT","LMT","MKT"}:
+            order_type = c_str.upper()
+        if c_str.upper() in {"DAY","GTC","STD"}:
+            tif = c_str.upper()
+
+    rec = {
+        "section": section.lower().replace(" ", "_"),
+        "event_type": "amend",
+        "amendment": {
+            "ref": ref,
+            "stop_price": stop_price,
+            "order_type": order_type,
+            "tif": tif,
+        },
+        "raw_cells": cells,
+    }
+    return rec
+
+def parse_file(path: str, include_rolling: bool=False) -> list:
+    results = []
+    section = "Top"
+    in_data = False
+    current_header = None
+
+    with open(path, "r", encoding="utf-8", errors="ignore", newline="") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            cells = [c for c in row]
+            raw_join = ",".join(row).strip()
+
+            if raw_join.strip() in {"Working Orders","Filled Orders","Canceled Orders","Rolling Strategies"}:
+                section = raw_join.strip()
+                in_data = False
+                current_header = None
                 continue
 
-    click.echo("\nDone. Wrote: {}".format(output_json))
-    click.echo("Processed rows: {}".format(row_index))
-    click.echo("Records per section (approx):")
-    for sec, cnt in section_counts.items():
-        click.echo(f"  {sec}: {cnt}")
+            if section == "Rolling Strategies" and not include_rolling:
+                continue
 
-if __name__ == '__main__':
+            cls = classify_row(cells)
+            if cls == "header":
+                current_header = cells
+                in_data = True
+                continue
+            elif cls in {"noise"}:
+                continue
+
+            if not in_data or not current_header:
+                continue
+
+            if cls == "amendment":
+                results.append(build_amendment_record(section, cells))
+                continue
+
+            rec = build_order_record(section, current_header, cells)
+            if rec:
+                results.append(rec)
+
+    return results
+
+def validate(records: list) -> dict:
+    issues = {}
+    def bump(k): issues[k] = issues.get(k,0)+1
+
+    for r in records:
+        et = r.get("event_type")
+        if et == "amend":
+            if not r.get("amendment",{}).get("ref"):
+                bump("amend_missing_ref")
+            if r.get("amendment",{}).get("stop_price") is None:
+                bump("amend_missing_stop_price")
+            continue
+
+        if not r.get("symbol"):
+            bump("missing_symbol")
+        if not r.get("side"):
+            bump("missing_side")
+        if r.get("qty_abs") is None:
+            bump("missing_qty")
+        asset_type = r.get("asset_type")
+        if asset_type == "OPTION":
+            opt = r.get("option") or {}
+            if not opt.get("exp_date"):
+                bump("option_missing_exp")
+            if opt.get("strike") is None:
+                bump("option_missing_strike")
+            if not opt.get("right") in {"PUT","CALL"}:
+                bump("option_missing_right")
+        elif asset_type == None and r.get("event_type") != "amend":
+            bump("unknown_asset_type")
+    return issues
+
+def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--input", required=True)
+    ap.add_argument("--output", required=True)
+    ap.add_argument("--include-rolling", action="store_true")
+    args = ap.parse_args()
+
+    records = parse_file(args.input, include_rolling=args.include_rolling)
+    issues = validate(records)
+
+    with open(args.output, "w", encoding="utf-8") as out:
+        for r in records:
+            out.write(json.dumps(r, ensure_ascii=False) + "\n")
+
+    sys.stderr.write(f"Parsed records: {len(records)}\n")
+    if issues:
+        sys.stderr.write("Validation issues:\n")
+        for k,v in sorted(issues.items()):
+            sys.stderr.write(f"  - {k}: {v}\n")
+    else:
+        sys.stderr.write("No validation issues detected.\n")
+
+if __name__ == "__main__":
     main()
