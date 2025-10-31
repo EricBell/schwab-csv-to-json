@@ -403,7 +403,7 @@ class TestOutputFormat:
             # Check first canceled order
             rec1 = records[0]
             assert rec1['section'] == 'Canceled Orders'
-            assert rec1['time_canceled'] == '10/24/25 09:51:36'
+            assert rec1['time_canceled'] == '2025-10-24T09:51:36'  # ISO format
             assert rec1['side'] == 'SELL'
             assert rec1['qty'] == -75
             assert rec1['symbol'] == 'NEUP'

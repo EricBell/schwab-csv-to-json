@@ -2,57 +2,61 @@
 
 This document tracks the implementation of multi-file CSV processing with a Textual-based TUI interface. All tasks follow TDD methodology.
 
-## Phase 1: Fix Broken Tests & Click Migration (TDD Foundation)
+## Phase 1: Fix Broken Tests & Click Migration (TDD Foundation) ✅ COMPLETE
 
-### 1.1 Click CLI Migration
-- [ ] Replace argparse with Click decorators in main.py
-- [ ] Add Click command group structure
-- [ ] Migrate `--input`, `--output`, `--include-rolling` to Click options
-- [ ] Add new Click options: `--output-json`, `--pretty`, `--preview`, `--max-rows`, `--verbose`
-- [ ] Add `--section-patterns-file` option for custom patterns.json
-- [ ] Add `--qty-unsigned` option
-- [ ] Add `--encoding` option for CSV file encoding
-- [ ] Verify Click CLI works with basic test run
+### 1.1 Click CLI Migration ✅
+- [x] Replace argparse with Click decorators in main.py
+- [x] Add Click command group structure
+- [x] Migrate `--input`, `--output`, `--include-rolling` to Click options (now INPUT_CSV, OUTPUT_JSON)
+- [x] Add new Click options: `--output-json`, `--pretty`, `--preview`, `--max-rows`, `--verbose`
+- [x] Add `--section-patterns-file` option for custom patterns.json
+- [x] Add `--qty-unsigned` option
+- [x] Add `--qty-signed` option (for test compatibility)
+- [x] Add `--encoding` option for CSV file encoding
+- [x] Verify Click CLI works with basic test run
 
-### 1.2 Add Missing Helper Functions
-- [ ] Implement `compile_section_patterns(patterns_dict)` - compile regex patterns from dict
-- [ ] Implement `map_header_to_index(header_row, col_aliases)` - map headers to column indices
-- [ ] Implement `safe_get(cells, index, default=None)` - safely get cell value by index
-- [ ] Implement `detect_section_from_row(cells, patterns)` - match row against section patterns
-- [ ] Implement `parse_integer_qty(value, unsigned=False)` - parse quantity with sign handling
-- [ ] Implement `parse_float_field(value)` - parse price/float fields with $ and comma removal
-- [ ] Add unit tests for each helper function
-- [ ] Verify all helper tests pass
+### 1.2 Add Missing Helper Functions ✅
+- [x] Implement `compile_section_patterns(patterns_dict)` - compile regex patterns from dict
+- [x] Implement `map_header_to_index(header_row, col_aliases)` - map headers to column indices
+- [x] Implement `safe_get(cells, index, default=None)` - safely get cell value by index
+- [x] Implement `detect_section_from_row(cells, patterns)` - match row against section patterns
+- [x] Implement `parse_integer_qty(value, issues, unsigned=False)` - parse quantity with sign handling
+- [x] Implement `parse_float_field(value, field_name, issues)` - parse price/float fields with $ and comma removal
+- [x] Add unit tests for each helper function
+- [x] Verify all helper tests pass (76 unit tests passing)
 
-### 1.3 Add Configuration Constants
-- [ ] Define `COL_ALIASES` dict mapping header variations to canonical names
-- [ ] Define `DEFAULT_SECTION_PATTERNS` dict with regex patterns
-- [ ] Integrate patterns.json loading into `compile_section_patterns()`
-- [ ] Add tests for pattern compilation
-- [ ] Add tests for column alias mapping
+### 1.3 Add Configuration Constants ✅
+- [x] Define `COL_ALIASES` dict mapping header variations to canonical names (flat dict structure)
+- [x] Define `DEFAULT_SECTION_PATTERNS` dict with regex patterns (supports both section names and full headers)
+- [x] Integrate patterns.json loading into `compile_section_patterns()`
+- [x] Add tests for pattern compilation
+- [x] Add tests for column alias mapping
 
-### 1.4 Unified Output Schema
-- [ ] Update `build_order_record()` to include `row_index` field
-- [ ] Update `build_order_record()` to include `raw` CSV line field
-- [ ] Update `build_order_record()` to include `issues` array field
-- [ ] Update `build_order_record()` to include `section` field
-- [ ] Update `build_amendment_record()` with same schema additions
-- [ ] Add `section_header` marker in issues array for header rows
-- [ ] Write tests for unified schema output
+### 1.4 Unified Output Schema ✅
+- [x] Update `build_order_record()` to include `row_index` field
+- [x] Update `build_order_record()` to include `raw` CSV line field
+- [x] Update `build_order_record()` to include `issues` array field
+- [x] Update `build_order_record()` to include `section` field (with original casing preserved)
+- [x] Update `build_order_record()` to include ALL required fields (even if None)
+- [x] Update `build_amendment_record()` with same schema additions
+- [x] Add `section_header` marker in issues array for header rows
+- [x] Write tests for unified schema output
 
-### 1.5 Output Format Support
-- [ ] Add NDJSON output formatter (existing behavior)
-- [ ] Add JSON array output formatter
-- [ ] Add pretty-print support for JSON arrays
-- [ ] Add tests for both output formats
-- [ ] Add tests for pretty printing
+### 1.5 Output Format Support ✅
+- [x] Add NDJSON output formatter (existing behavior)
+- [x] Add JSON array output formatter
+- [x] Add pretty-print support for JSON arrays
+- [x] Add tests for both output formats
+- [x] Add tests for pretty printing
 
-### 1.6 Verify All Tests Pass
-- [ ] Run `uv run pytest tests/test_main.py` - all unit tests pass
-- [ ] Run `uv run pytest tests/test_integration.py` - all integration tests pass
-- [ ] Run `uv run pytest -v` - complete test suite passes
-- [ ] Fix any remaining test failures
-- [ ] Achieve green test status before proceeding
+### 1.6 Verify All Tests Pass ✅
+- [x] Run `uv run pytest tests/test_main.py` - all unit tests pass (76/76)
+- [x] Run `uv run pytest tests/test_integration.py` - all integration tests pass (19/19)
+- [x] Run `uv run pytest -v` - complete test suite passes (95/95) ✅
+- [x] Fix any remaining test failures
+- [x] Achieve green test status before proceeding
+
+**Status**: Phase 1 COMPLETE - All 95 tests passing!
 
 ---
 
