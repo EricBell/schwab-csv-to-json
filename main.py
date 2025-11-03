@@ -722,7 +722,7 @@ def validate(records: List[Dict[str, Any]]) -> Dict[str, int]:
 
 
 @click.command()
-@click.argument('input_csv', type=click.Path(exists=True), metavar='INPUT_CSV')
+@click.argument('input_csv', nargs=-1, required=True, type=click.Path(exists=True), metavar='INPUT_CSV...')
 @click.argument('output_json', type=click.Path(), metavar='OUTPUT_JSON')
 @click.option('--include-rolling', is_flag=True, help='Include Rolling Strategies section')
 @click.option('--output-json', 'format_json', is_flag=True, help='Output as JSON array instead of NDJSON')
@@ -740,47 +740,114 @@ def main(input_csv, output_json, include_rolling, format_json, output_ndjson, pr
     """
     Convert Schwab CSV trade activity reports to JSON/NDJSON format.
 
-    INPUT_CSV: Path to Schwab CSV file
+    Supports both single file and multi-file (batch) processing.
+
+    INPUT_CSV: Path(s) to Schwab CSV file(s). Multiple files can be specified.
     OUTPUT_JSON: Path to output file (.ndjson or .json)
+
+    Examples:
+        Single file:  main.py input.csv output.ndjson
+        Multiple files: main.py file1.csv file2.csv file3.csv output.ndjson
     """
+    from batch import process_multiple_files, BatchOptions
+
+    # Convert input_csv tuple to list
+    input_files = list(input_csv)
+
     # Load custom section patterns if provided
     section_patterns = None
     if section_patterns_file:
         with open(section_patterns_file, 'r') as f:
             section_patterns = json.load(f)
 
-    # Parse the CSV file
-    if verbose:
-        click.echo(f"Parsing {input_csv}...", err=True)
+    # Determine if we're in batch mode (multiple files)
+    is_batch_mode = len(input_files) > 1
 
-    records = parse_file(
-        input_csv,
-        include_rolling=include_rolling,
-        section_patterns=section_patterns,
-        max_rows=max_rows,
-        qty_unsigned=qty_unsigned,
-        verbose=verbose
-    )
+    if is_batch_mode:
+        # Batch processing mode
+        if verbose:
+            click.echo(f"Batch processing {len(input_files)} files...", err=True)
 
-    # Validate records
-    validation_issues = validate(records)
+        options = BatchOptions(
+            include_rolling=include_rolling,
+            section_patterns=section_patterns,
+            max_rows=max_rows,
+            qty_unsigned=qty_unsigned,
+            verbose=verbose
+        )
 
-    # Write output
-    if format_json or output_json.endswith('.json'):
-        # JSON array format
-        with open(output_json, 'w', encoding='utf-8') as out:
-            if pretty:
-                json.dump(records, out, ensure_ascii=False, indent=2)
-            else:
-                json.dump(records, out, ensure_ascii=False)
+        # Progress callback for verbose mode
+        def progress_callback(progress):
+            if verbose:
+                status_msg = f"[{progress.file_index + 1}/{progress.total_files}] "
+                if progress.status == 'processing':
+                    click.echo(f"{status_msg}Processing {Path(progress.file_path).name}...", err=True)
+                elif progress.status == 'completed':
+                    click.echo(f"{status_msg}Completed {Path(progress.file_path).name} ({progress.records_parsed} records)", err=True)
+                elif progress.status == 'failed':
+                    click.echo(f"{status_msg}Failed {Path(progress.file_path).name}: {progress.error}", err=True)
+
+        result = process_multiple_files(
+            input_files,
+            output_json,
+            options,
+            progress_callback=progress_callback if verbose else None
+        )
+
+        validation_issues = result.validation_issues
+
+        # Report batch results
+        click.echo(f"Batch processing complete:", err=True)
+        click.echo(f"  Files processed: {result.successful_files}/{result.total_files}", err=True)
+        click.echo(f"  Total records: {result.total_records}", err=True)
+        if result.failed_files > 0:
+            click.echo(f"  Failed files: {result.failed_files}", err=True)
+            for file_path, error in result.file_errors.items():
+                click.echo(f"    - {Path(file_path).name}: {error}", err=True)
+
+        # Load records for preview if requested
+        records = []
+        if preview:
+            with open(output_json, 'r', encoding='utf-8') as f:
+                for line in f:
+                    records.append(json.loads(line))
+
     else:
-        # NDJSON format (default)
-        with open(output_json, 'w', encoding='utf-8') as out:
-            for r in records:
-                out.write(json.dumps(r, ensure_ascii=False) + '\n')
+        # Single file mode
+        input_file = input_files[0]
 
-    # Print summary
-    click.echo(f"Parsed records: {len(records)}", err=True)
+        if verbose:
+            click.echo(f"Parsing {input_file}...", err=True)
+
+        records = parse_file(
+            input_file,
+            include_rolling=include_rolling,
+            section_patterns=section_patterns,
+            max_rows=max_rows,
+            qty_unsigned=qty_unsigned,
+            verbose=verbose
+        )
+
+        # Validate records
+        validation_issues = validate(records)
+
+        # Write output
+        if format_json or output_json.endswith('.json'):
+            # JSON array format
+            with open(output_json, 'w', encoding='utf-8') as out:
+                if pretty:
+                    json.dump(records, out, ensure_ascii=False, indent=2)
+                else:
+                    json.dump(records, out, ensure_ascii=False)
+        else:
+            # NDJSON format (default)
+            with open(output_json, 'w', encoding='utf-8') as out:
+                for r in records:
+                    out.write(json.dumps(r, ensure_ascii=False) + '\n')
+
+        click.echo(f"Parsed records: {len(records)}", err=True)
+
+    # Print validation summary (for both modes)
     if validation_issues:
         click.echo("Validation issues:", err=True)
         for k, v in sorted(validation_issues.items()):
