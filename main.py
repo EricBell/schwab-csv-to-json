@@ -721,7 +721,13 @@ def validate(records: List[Dict[str, Any]]) -> Dict[str, int]:
     return issues
 
 
-@click.command()
+@click.group()
+def cli():
+    """Schwab CSV to JSON converter with TUI and CLI modes."""
+    pass
+
+
+@cli.command(name='convert')
 @click.argument('input_csv', nargs=-1, required=True, type=click.Path(exists=True), metavar='INPUT_CSV...')
 @click.argument('output_json', type=click.Path(), metavar='OUTPUT_JSON')
 @click.option('--include-rolling', is_flag=True, help='Include Rolling Strategies section')
@@ -735,7 +741,7 @@ def validate(records: List[Dict[str, Any]]) -> Dict[str, int]:
 @click.option('--qty-signed', is_flag=True, default=True, help='Parse quantities as signed (keep sign, default)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
 @click.option('--encoding', default='utf-8', help='CSV file encoding (default: utf-8)')
-def main(input_csv, output_json, include_rolling, format_json, output_ndjson, pretty,
+def convert(input_csv, output_json, include_rolling, format_json, output_ndjson, pretty,
          preview, section_patterns_file, max_rows, qty_unsigned, qty_signed, verbose, encoding):
     """
     Convert Schwab CSV trade activity reports to JSON/NDJSON format.
@@ -864,5 +870,31 @@ def main(input_csv, output_json, include_rolling, format_json, output_ndjson, pr
                 click.echo()
 
 
+@cli.command(name='tui')
+@click.option('--dir', 'starting_dir', default='.', help='Starting directory for file browser')
+@click.option('--output', 'output_path', default='output.ndjson', help='Default output file path')
+def tui_command(starting_dir, output_path):
+    """
+    Launch interactive TUI for batch processing.
+
+    The TUI provides:
+    - File selection with directory browser
+    - Real-time progress tracking
+    - Error review
+    - Processing summary
+
+    Example:
+        main.py tui
+        main.py tui --dir /path/to/csvs --output results.ndjson
+    """
+    from tui import run_tui
+    run_tui(starting_dir=starting_dir, output_path=output_path)
+
+
+# Backward compatibility: allow calling convert command directly
+# This is the same as convert, just with a different name for test compatibility
+main = convert
+
+
 if __name__ == '__main__':
-    main()
+    cli()
