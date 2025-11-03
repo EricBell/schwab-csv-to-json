@@ -4,7 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python CLI tool that converts Schwab CSV trade activity reports into flat NDJSON (newline-delimited JSON) or JSON array format. Schwab CSVs contain multiple logical sections (Filled Orders, Working Orders, Canceled Orders, Rolling Strategies) within a single file, each with its own header row.
+This is a Python CLI tool with interactive TUI that converts Schwab CSV trade activity reports into flat NDJSON (newline-delimited JSON) or JSON array format. It supports both single-file and multi-file (batch) processing. Schwab CSVs contain multiple logical sections (Filled Orders, Working Orders, Canceled Orders, Rolling Strategies) within a single file, each with its own header row.
+
+### Modes of Operation
+
+1. **TUI Mode** (`main.py tui`): Interactive terminal UI with file browser, progress tracking, error review, and summary screens
+2. **CLI Batch Mode** (`main.py convert file1.csv file2.csv... output.ndjson`): Process multiple files into merged output
+3. **CLI Single Mode** (`main.py convert input.csv output.ndjson`): Traditional single-file conversion
 
 ## Architecture
 
@@ -33,18 +39,49 @@ The patterns.json file contains actual header signatures extracted from real Sch
 ## Running the Tool
 
 ```bash
-# Basic usage with uv
-uv run python main.py examples/2025-10-24-TradeActivity.csv output.ndjson
+# Launch interactive TUI (recommended for batch processing)
+uv run python main.py tui
+
+# Basic single-file conversion
+uv run python main.py convert examples/2025-10-24-TradeActivity.csv output.ndjson
+
+# Batch processing multiple files
+uv run python main.py convert file1.csv file2.csv file3.csv merged_output.ndjson --verbose
 
 # With options
-uv run python main.py input.csv output.ndjson --preview 10 --verbose
+uv run python main.py convert input.csv output.ndjson --preview 10 --verbose
 
 # Output as JSON array instead of NDJSON
-uv run python main.py input.csv output.json --output-json --pretty
+uv run python main.py convert input.csv output.json --output-json --pretty
 
 # Use custom section patterns
-uv run python main.py input.csv output.ndjson --section-patterns-file patterns.json
+uv run python main.py convert input.csv output.ndjson --section-patterns-file patterns.json
 ```
+
+## Batch Processing Architecture
+
+The `batch.py` module handles multi-file processing:
+
+- **BatchOptions**: Dataclass containing processing configuration
+- **FileProgress**: Progress information for each file during processing
+- **BatchResult**: Aggregated results including file counts, records, validation issues, and errors
+- **process_multiple_files()**: Main entry point that processes files sequentially with optional progress callbacks
+- **process_single_file_for_batch()**: Helper that processes one file and adds source metadata
+
+Each record in batch output includes:
+- `source_file`: Basename of the source CSV file
+- `source_file_index`: 0-based index in the batch
+
+## TUI Architecture
+
+The `tui.py` module implements a Textual-based terminal UI with 4 screens:
+
+1. **FileSelectionScreen**: Directory browser for selecting multiple CSV files
+2. **ProcessingScreen**: Progress bars showing real-time processing status
+3. **SummaryScreen**: Statistics display with processing time, record counts, validation issues
+4. **ErrorReviewScreen**: DataTable showing detailed validation errors
+
+State management uses the `AppState` dataclass to track selected files, processing status, results, and progress.
 
 ## Key Options
 
