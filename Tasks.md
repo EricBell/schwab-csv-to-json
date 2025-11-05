@@ -242,7 +242,7 @@ This document tracks the implementation of multi-file CSV processing with a Text
 
 ---
 
-## Completion Checklist ✅
+## Completion Checklist (Version 1.0) ✅
 
 - [x] All tests passing (`uv run pytest`) - **110/110 tests** ✓
 - [x] TUI fully functional (4 screens with navigation)
@@ -250,12 +250,194 @@ This document tracks the implementation of multi-file CSV processing with a Text
 - [x] Documentation updated (README.md, CLAUDE.md)
 - [x] No regressions in single-file mode
 - [x] Code follows TDD principles throughout
-- [x] **Ready for production use** ✅
+- [x] **Version 1.0 Complete** ✅
+
+---
+
+## Phase 6: Enhanced Batch Features (Version 1.1) 🔄 IN PROGRESS
+
+This phase adds enhanced batch processing capabilities based on user feedback from v1.0.
+
+### 6.1 TUI Multi-Select UX Improvements
+
+**Goal:** Make multi-file selection more obvious and user-friendly
+
+- [ ] **Research TUI Selection Patterns**
+  - [ ] Review current DirectoryTree implementation
+  - [ ] Research Textual widgets for better multi-select UX
+  - [ ] Design mockup of improved file selection UI
+
+- [ ] **Write Tests for Enhanced TUI Selection**
+  - [ ] Test: Selected files display with visual indicators
+  - [ ] Test: Selection count updates correctly
+  - [ ] Test: Clear selection functionality
+  - [ ] Test: Keyboard shortcuts for select all/clear
+
+- [ ] **Implement Visual Selection Indicators**
+  - [ ] Add checkbox or marker icons next to selected files
+  - [ ] Add real-time selection counter (e.g., "Selected: 3 files")
+  - [ ] Add selected files list panel/widget
+  - [ ] Update help text with selection instructions
+
+- [ ] **Add Selection Management Features**
+  - [ ] Add "Select All CSV" keyboard shortcut (Ctrl+A or 'a')
+  - [ ] Add "Clear Selection" keyboard shortcut (Ctrl+D or 'c')
+  - [ ] Add individual file deselection in list
+  - [ ] Update bindings in footer to show new shortcuts
+
+- [ ] **Update TUI Documentation**
+  - [ ] Update README with TUI selection instructions
+  - [ ] Add screenshots/examples if possible
+  - [ ] Update CLAUDE.md with TUI architecture changes
+
+### 6.2 Skip Empty Sections (Filter Header-Only Sections)
+
+**Goal:** Only output sections that contain data rows after the header
+
+- [ ] **Write Tests for Empty Section Filtering**
+  - [ ] Test: Section with header only is skipped
+  - [ ] Test: Section with header + data rows is included
+  - [ ] Test: Multiple empty sections are all skipped
+  - [ ] Test: Skipped sections don't affect validation stats
+  - [ ] Test: Verbose mode reports skipped sections
+  - [ ] Test: `--include-empty-sections` flag preserves old behavior
+
+- [ ] **Implement Section Buffering Logic**
+  - [ ] Add buffer to hold section header while checking for data rows
+  - [ ] Modify `parse_file()` to buffer section headers
+  - [ ] Only emit section header if data rows follow
+  - [ ] Track skipped section count for statistics
+
+- [ ] **Add CLI Option**
+  - [ ] Add `--skip-empty-sections` flag (default: true)
+  - [ ] Add `--include-empty-sections` flag (opposite behavior)
+  - [ ] Update BatchOptions dataclass with new flag
+  - [ ] Update Click command with new options
+
+- [ ] **Update Statistics Reporting**
+  - [ ] Add "Sections skipped" to BatchResult
+  - [ ] Report skipped sections in verbose mode
+  - [ ] Update TUI summary screen with skipped sections count
+
+### 6.3 Section-Grouped Output
+
+**Goal:** Group all records by section across all files
+
+- [ ] **Design Grouping Architecture**
+  - [ ] Design data structure for section groups
+  - [ ] Determine section order (alphabetical, predefined, or user-defined)
+  - [ ] Plan where grouping happens (in batch.py or separate module)
+
+- [ ] **Write Tests for Section Grouping**
+  - [ ] Test: Records from multiple files grouped by section
+  - [ ] Test: All "Filled Orders" together, all "Canceled Orders" together
+  - [ ] Test: Section order is deterministic
+  - [ ] Test: Source file metadata preserved after grouping
+  - [ ] Test: Works for both NDJSON and JSON array formats
+  - [ ] Test: `--preserve-file-order` flag disables grouping
+
+- [ ] **Implement Grouping Function**
+  - [ ] Create `group_records_by_section()` function
+  - [ ] Input: List of all records from batch
+  - [ ] Output: OrderedDict of section_name -> list of records
+  - [ ] Preserve section header records at beginning of each group
+  - [ ] Handle section names case-insensitively
+
+- [ ] **Integrate Grouping into Batch Processing**
+  - [ ] Call grouping function in `process_multiple_files()`
+  - [ ] Apply grouping before writing output
+  - [ ] Add `group_by_section` parameter to BatchOptions
+  - [ ] Add CLI flag `--group-by-section` (default: true)
+  - [ ] Add CLI flag `--preserve-file-order` (default: false)
+
+### 6.4 Time-Based Sorting Within Sections
+
+**Goal:** Sort records within each section by execution time
+
+- [ ] **Design Sorting Logic**
+  - [ ] Define time field priority: exec_time > time_canceled > time_placed
+  - [ ] Handle records with no time field (sort to end)
+  - [ ] Handle records with unparseable time values
+
+- [ ] **Write Tests for Time Sorting**
+  - [ ] Test: Records within section sorted by exec_time ascending
+  - [ ] Test: Mixed time fields (exec_time, time_canceled) handled correctly
+  - [ ] Test: Records with no time field appear at end
+  - [ ] Test: Null time values don't cause errors
+  - [ ] Test: Section header records stay at beginning of section
+
+- [ ] **Implement Sorting Function**
+  - [ ] Create `get_sort_time(record)` helper function
+  - [ ] Returns primary time field based on priority
+  - [ ] Create `sort_records_by_time(records)` function
+  - [ ] Sort with None values at end
+  - [ ] Preserve section header position (don't sort)
+
+- [ ] **Integrate Sorting into Grouping**
+  - [ ] Apply sorting after grouping records by section
+  - [ ] Sort each section group independently
+  - [ ] Ensure section headers stay at top of each group
+
+### 6.5 Integration Testing & Documentation
+
+- [ ] **Write Integration Tests**
+  - [ ] Test: Full pipeline with 3+ files, empty sections, grouping, sorting
+  - [ ] Test: CLI batch mode with new flags
+  - [ ] Test: TUI mode with enhanced multi-select
+  - [ ] Test: All combinations of new flags
+  - [ ] Test: Backward compatibility with v1.0 behavior
+
+- [ ] **Update Documentation**
+  - [ ] Update README with new CLI flags
+  - [ ] Update README with TUI selection instructions
+  - [ ] Update CLAUDE.md with architectural changes
+  - [ ] Update PRD checklist for v1.1 features
+  - [ ] Add examples of section-grouped output
+
+- [ ] **Performance Testing**
+  - [ ] Test with large batches (10+ files)
+  - [ ] Test with files having many empty sections
+  - [ ] Ensure grouping/sorting doesn't significantly impact performance
+  - [ ] Profile memory usage for large batches
+
+### 6.6 Final Validation & Release
+
+- [ ] **Run Full Test Suite**
+  - [ ] All existing tests pass (110/110)
+  - [ ] All new tests pass
+  - [ ] Integration tests pass
+  - [ ] No regressions
+
+- [ ] **Manual Testing**
+  - [ ] Test TUI with real Schwab CSV files
+  - [ ] Verify multi-select UX improvements
+  - [ ] Verify empty sections are skipped
+  - [ ] Verify section grouping and sorting works correctly
+  - [ ] Test all new CLI flags
+
+- [ ] **Update Version Numbers**
+  - [ ] Update version in README to 1.1
+  - [ ] Update PRD status to "Implemented - v1.1"
+  - [ ] Update pyproject.toml version
+  - [ ] Tag release as v1.1
+
+---
+
+## Phase 6 Completion Checklist
+
+- [ ] TUI multi-select UX enhanced with visual feedback
+- [ ] Empty sections filtering implemented
+- [ ] Section grouping implemented
+- [ ] Time-based sorting implemented
+- [ ] All tests passing (estimated: 130+ tests)
+- [ ] Documentation updated
+- [ ] **Version 1.1 ready for release**
 
 ---
 
 ## Project Statistics
 
+### Version 1.0 (Complete)
 - **Total Tests**: 110 (all passing)
   - Unit tests: 76
   - Integration tests: 19
@@ -264,6 +446,11 @@ This document tracks the implementation of multi-file CSV processing with a Text
 - **Test Coverage**: Comprehensive TDD coverage
 - **Files Created**: main.py, batch.py, tui.py, test_batch.py
 - **Phases Completed**: 5/5 (100%)
+
+### Version 1.1 (In Progress)
+- **Current Phase**: Phase 6 - Enhanced Batch Features
+- **Target**: TUI UX improvements, empty section filtering, section grouping/sorting
+- **Estimated Additional Tests**: 20-30 tests
 
 ---
 

@@ -1,9 +1,24 @@
 # Product Requirements Document (PRD)
 # Schwab CSV to JSON Converter
 
-**Version:** 1.0
-**Last Updated:** 2025-10-25
-**Status:** Draft
+**Version:** 1.1 (Planning)
+**Last Updated:** 2025-11-04
+**Status:**
+- ✅ **v1.0 COMPLETE** - All core requirements implemented (110 tests passing)
+- 🔄 **v1.1 IN PLANNING** - Enhanced batch features (Section 10)
+
+**Implementation Summary:**
+
+**Version 1.0 (Complete):**
+- ✅ Functional Requirements: 13/13 (100%)
+- ✅ Non-Functional Requirements: 11/11 (100%)
+- ✅ Success Metrics: 4/4 (100%)
+- 🎯 Bonus Features: TUI mode, batch processing (110 tests passing)
+
+**Version 1.1 (Planned):**
+- 🔄 Enhanced TUI multi-select UX
+- 🔄 Skip empty sections filtering
+- 🔄 Section-grouped, time-sorted output
 
 ---
 
@@ -80,56 +95,56 @@ Users should be able to run one command and get analysis-ready JSON output.
 
 #### Input Processing
 <!-- What should the tool accept as input? -->
-- [ ] Accept Schwab CSV trade activity files as input
-- [ ] Support various CSV encodings (UTF-8, UTF-8 with BOM, etc.)
-- [ ] Handle malformed or incomplete CSV rows gracefully
+- [x] Accept Schwab CSV trade activity files as input
+- [x] Support various CSV encodings (UTF-8, UTF-8 with BOM, etc.)
+- [x] Handle malformed or incomplete CSV rows gracefully
 
 #### Section Detection & Parsing
 <!-- How should the tool identify and process different sections? -->
-- [ ] Automatically detect section boundaries (Filled Orders, Working Orders, etc.)
-- [ ] Map column headers to standardized field names
-- [ ] Support custom section detection patterns
+- [x] Automatically detect section boundaries (Filled Orders, Working Orders, etc.)
+- [x] Map column headers to standardized field names
+- [x] Support custom section detection patterns
 
 #### Data Transformation
 <!-- How should data be normalized and transformed? -->
-- [ ] Parse quantities as integers (with proper sign handling)
-- [ ] Parse prices as floats (removing $, commas)
-- [ ] Parse dates/timestamps in Schwab's format (e.g., "10/24/25 09:51:38")
-- [ ] Handle missing/empty fields as null values
-- [ ] Track parse errors and validation issues per record
+- [x] Parse quantities as integers (with proper sign handling)
+- [x] Parse prices as floats (removing $, commas)
+- [x] Parse dates/timestamps in Schwab's format (e.g., "10/24/25 09:51:38")
+- [x] Handle missing/empty fields as null values
+- [x] Track parse errors and validation issues per record
 
 #### Output Generation
 <!-- What output formats should be supported? -->
-- [ ] Generate NDJSON (newline-delimited JSON) by default
-- [ ] Support JSON array output as an option
-- [ ] Include all raw CSV data for reference
-- [ ] Include metadata: section name, row index, issues
+- [x] Generate NDJSON (newline-delimited JSON) by default
+- [x] Support JSON array output as an option
+- [x] Include all raw CSV data for reference
+- [x] Include metadata: section name, row index, issues
 
 ### 3.2 Non-Functional Requirements
 
 #### Performance
 <!-- What are the performance expectations? -->
-- [ ] Process files with thousands of rows efficiently
-- [ ] Memory usage should be reasonable for typical file sizes
+- [x] Process files with thousands of rows efficiently
+- [x] Memory usage should be reasonable for typical file sizes
 
 #### Usability
 <!-- How should the tool be used? -->
-- [ ] Command-line interface (CLI)
-- [ ] Clear error messages for invalid input
-- [ ] Help documentation (--help flag)
-- [ ] Preview mode to inspect output before full processing
+- [x] Command-line interface (CLI)
+- [x] Clear error messages for invalid input
+- [x] Help documentation (--help flag)
+- [x] Preview mode to inspect output before full processing
 
 #### Reliability
 <!-- What reliability guarantees should exist? -->
-- [ ] Never lose data (preserve raw CSV in output)
-- [ ] Gracefully handle edge cases (empty files, malformed data)
-- [ ] Validate input files exist before processing
+- [x] Never lose data (preserve raw CSV in output)
+- [x] Gracefully handle edge cases (empty files, malformed data)
+- [x] Validate input files exist before processing
 
 #### Maintainability
 <!-- Development and maintenance requirements -->
-- [ ] Well-tested with unit and integration tests
-- [ ] Follow TDD methodology for new features
-- [ ] Clear, documented code
+- [x] Well-tested with unit and integration tests (110 tests passing)
+- [x] Follow TDD methodology for new features
+- [x] Clear, documented code
 
 ---
 
@@ -287,10 +302,10 @@ python main.py <input.csv> <output.json>
 ### How do we measure success?
 <!-- What indicates this tool is working well? -->
 
-- [ ] Successfully parses 100% of valid Schwab CSV exports
-- [ ] Zero data loss (all raw data preserved)
-- [ ] Parse errors are tracked and reported (issues array)
-- [ ] Users can easily customize section detection
+- [x] Successfully parses 100% of valid Schwab CSV exports
+- [x] Zero data loss (all raw data preserved)
+- [x] Parse errors are tracked and reported (issues array)
+- [x] Users can easily customize section detection
 
 ---
 
@@ -299,12 +314,18 @@ python main.py <input.csv> <output.json>
 ### Potential Future Features
 <!-- Features that are out of scope now but might be added later -->
 
-1. **Date normalization**: Convert Schwab date format to ISO-8601
-2. **CSV output option**: Convert to normalized CSV (instead of JSON)
-3. **Multi-file processing**: Process entire directory of CSVs
-4. **Summary statistics**: Generate summary report (total trades, P&L, etc.)
-5. **Validation rules**: Custom validation rules per section
-6. **Streaming mode**: Process very large files with constant memory
+1. **Date normalization**: Convert Schwab date format to ISO-8601 ⚠️ _(Partially implemented - parse_datetime_maybe converts to ISO format)_
+2. **CSV output option**: Convert to normalized CSV (instead of JSON) ❌ _(Not implemented)_
+3. **Multi-file processing**: Process entire directory of CSVs ✅ _(IMPLEMENTED - batch.py module with CLI and TUI support)_
+4. **Summary statistics**: Generate summary report (total trades, P&L, etc.) ✅ _(IMPLEMENTED - validation stats, processing time, TUI summary screen)_
+5. **Validation rules**: Custom validation rules per section ❌ _(Not implemented)_
+6. **Streaming mode**: Process very large files with constant memory ❌ _(Not implemented)_
+
+### Bonus Features Implemented (Beyond Original PRD)
+
+7. **Interactive TUI Mode**: Full terminal UI with 4 screens (file selection, progress tracking, summary, error review) ✅
+8. **Batch Processing with Progress**: Real-time progress callbacks and per-file status tracking ✅
+9. **Source File Metadata**: Each record includes source_file and source_file_index for batch operations ✅
 
 ---
 
@@ -326,7 +347,120 @@ python main.py <input.csv> <output.json>
 
 ---
 
-## 10. Appendix
+## 10. Phase 2 Requirements (Version 1.1)
+
+**Status:** Planned
+**Target Version:** 1.1
+
+This section documents additional requirements identified after the initial implementation (v1.0) was completed.
+
+### 10.1 Enhanced TUI Multi-Select Experience
+
+**Current State:** The TUI supports multi-file selection via DirectoryTree widget, but the UX is not obvious to users.
+
+**Requirement:** Improve visual feedback for multi-file selection in TUI.
+
+**Acceptance Criteria:**
+- [ ] TUI displays clear visual indicators when files are selected (checkboxes or markers)
+- [ ] Selected file count is prominently displayed and updates in real-time
+- [ ] Instructions clearly explain how to select/deselect files
+- [ ] Selected files list is visible before starting processing
+- [ ] Users can easily deselect individual files
+
+**Implementation Notes:**
+- Consider adding checkboxes next to CSV files in tree
+- Add "Selected: N files" indicator at top of screen
+- Display list of selected files in a panel
+- Add keyboard shortcuts for "select all" and "clear selection"
+
+---
+
+### 10.2 Skip Empty Sections
+
+**Current State:** The parser outputs section header rows even when no data rows follow.
+
+**Requirement:** Only include sections in output that contain at least one data row after the header.
+
+**Acceptance Criteria:**
+- [ ] Section headers with no following data rows are excluded from output
+- [ ] Empty sections do not appear in validation statistics
+- [ ] Users are notified (in verbose mode) when sections are skipped
+- [ ] Works for both single-file and batch processing modes
+
+**Example:**
+```csv
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Symbol...
+(no data rows)
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Symbol...
+,,10/24/25 09:51:38,STOCK,SELL,-75,NEUP...
+```
+
+**Expected Output:** Only "Filled Orders" section is included; "Working Orders" section is skipped entirely.
+
+**Implementation Notes:**
+- Add buffering logic to detect if data rows exist after header
+- Track skipped sections count in batch statistics
+- Add `--include-empty-sections` flag to preserve old behavior if needed
+
+---
+
+### 10.3 Section-Grouped, Time-Sorted Output
+
+**Current State:** Batch processing outputs records in file order (file1 all records, file2 all records, etc.)
+
+**Requirement:** Group all records by section name across all files, then sort by execution time within each section.
+
+**Acceptance Criteria:**
+- [ ] All records from the same section are grouped together (e.g., all "Filled Orders" from all files)
+- [ ] Records within each section are sorted by `exec_time` in ascending order
+- [ ] Source file metadata (`source_file`, `source_file_index`) is preserved
+- [ ] Works for both NDJSON and JSON array output formats
+- [ ] Section order is deterministic (e.g., alphabetical or predefined order)
+
+**Example Output Structure:**
+```
+# All Filled Orders from all files, sorted by exec_time
+{"section": "Filled Orders", "exec_time": "2025-10-24T09:30:00", "source_file": "file1.csv", ...}
+{"section": "Filled Orders", "exec_time": "2025-10-24T09:45:00", "source_file": "file2.csv", ...}
+{"section": "Filled Orders", "exec_time": "2025-10-24T10:00:00", "source_file": "file1.csv", ...}
+
+# Then all Canceled Orders from all files, sorted by time_canceled
+{"section": "Canceled Orders", "time_canceled": "2025-10-24T09:35:00", "source_file": "file1.csv", ...}
+{"section": "Canceled Orders", "time_canceled": "2025-10-24T09:50:00", "source_file": "file2.csv", ...}
+```
+
+**Sort Field Priority:**
+- Primary: `exec_time` (for Filled Orders)
+- Fallback: `time_canceled` (for Canceled Orders)
+- Fallback: `time_placed` (for Working Orders)
+- Records with no time field: Sorted to end of section
+
+**Implementation Notes:**
+- Post-processing step after batch collection
+- Group by `section` field
+- Sort within each group by time field
+- Preserve section header records at beginning of each section
+- Add `--preserve-file-order` flag to disable grouping if needed
+
+---
+
+### 10.4 Configuration Options
+
+New CLI flags to support these features:
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--skip-empty-sections` | true | Skip sections with no data rows |
+| `--include-empty-sections` | false | Include section headers even with no data |
+| `--group-by-section` | true | Group records by section and sort by time |
+| `--preserve-file-order` | false | Keep original file-by-file output order |
+
+---
+
+## 11. Appendix
 
 ### Example Input
 <!-- Paste a small sample of actual Schwab CSV -->
