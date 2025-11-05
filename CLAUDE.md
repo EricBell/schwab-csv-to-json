@@ -62,21 +62,34 @@ uv run python main.py convert input.csv output.ndjson --section-patterns-file pa
 
 The `batch.py` module handles multi-file processing:
 
-- **BatchOptions**: Dataclass containing processing configuration
+- **BatchOptions**: Dataclass containing processing configuration (including skip_empty_sections and group_by_section)
 - **FileProgress**: Progress information for each file during processing
-- **BatchResult**: Aggregated results including file counts, records, validation issues, and errors
+- **BatchResult**: Aggregated results including file counts, records, validation issues, errors, and sections_skipped count
 - **process_multiple_files()**: Main entry point that processes files sequentially with optional progress callbacks
 - **process_single_file_for_batch()**: Helper that processes one file and adds source metadata
+- **group_and_sort_records()**: Groups records by section and sorts by time (exec_time > time_canceled > time_placed)
+- **get_sort_time()**: Extracts the appropriate time field for sorting with priority handling
 
 Each record in batch output includes:
 - `source_file`: Basename of the source CSV file
 - `source_file_index`: 0-based index in the batch
 
+### New Batch Features (v1.1)
+
+- **Empty Section Filtering**: Sections with only headers (no data rows) are automatically skipped by default
+- **Section Grouping**: Records from multiple files are grouped by section name across all files
+- **Time-based Sorting**: Within each section, records are sorted chronologically by timestamp
+- **Configurable Behavior**: Both features can be disabled with CLI flags (--include-empty-sections, --preserve-file-order)
+
 ## TUI Architecture
 
 The `tui.py` module implements a Textual-based terminal UI with 4 screens:
 
-1. **FileSelectionScreen**: Directory browser for selecting multiple CSV files
+1. **FileSelectionScreen**: Split-view with directory browser (left) and selected files list (right)
+   - Visual selection indicators with checkboxes (☑)
+   - Real-time selection counter
+   - Clear multi-select instructions
+   - Keyboard shortcuts: ENTER to toggle, 'c' to clear all, 's' to start
 2. **ProcessingScreen**: Progress bars showing real-time processing status
 3. **SummaryScreen**: Statistics display with processing time, record counts, validation issues
 4. **ErrorReviewScreen**: DataTable showing detailed validation errors
@@ -90,6 +103,8 @@ State management uses the `AppState` dataclass to track selected files, processi
 - `--pretty`: Pretty-print JSON arrays
 - `--section-patterns-file`: Override default section detection patterns
 - `--max-rows N`: Process only first N rows (for testing)
+- `--skip-empty-sections/--include-empty-sections`: Skip sections with no data rows (default: skip)
+- `--group-by-section/--preserve-file-order`: Group records by section and sort by time (default: group)
 - `--verbose`: Enable debug logging
 
 ## Development Setup

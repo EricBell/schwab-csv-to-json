@@ -559,8 +559,9 @@ def parse_file(
     section_patterns: Dict[str, str] = None,
     max_rows: int = None,
     qty_unsigned: bool = False,
-    verbose: bool = False
-) -> List[Dict[str, Any]]:
+    verbose: bool = False,
+    skip_empty_sections: bool = False
+) -> Tuple[List[Dict[str, Any]], int]:
     """
     Parse Schwab CSV file to records.
 
@@ -571,15 +572,22 @@ def parse_file(
         max_rows: Max rows to process (for testing)
         qty_unsigned: Parse quantities as unsigned
         verbose: Enable verbose logging
+        skip_empty_sections: Skip sections with only headers (no data rows)
 
     Returns:
-        List of record dicts
+        Tuple of (list of record dicts, count of skipped sections)
     """
     results = []
     section = 'Top'
     in_data = False
     current_header_map = None
     row_index = 0
+    sections_skipped = 0
+
+    # Buffering for empty section filtering
+    buffered_section_header = None
+    buffered_column_header = None
+    buffered_header_map = None
 
     if section_patterns is None:
         section_patterns = DEFAULT_SECTION_PATTERNS
@@ -601,19 +609,19 @@ def parse_file(
             # Check for section header
             detected_section = detect_section_from_row(cells, compiled_patterns)
             if detected_section:
+                # If we had buffered headers, they belong to an empty section
+                if skip_empty_sections and buffered_section_header is not None:
+                    sections_skipped += 1
+                    if verbose:
+                        click.echo(f"Skipping empty section: {buffered_section_header['section']}", err=True)
+
                 section = detected_section
                 in_data = False
                 current_header_map = None
+                buffered_header_map = None
 
-                # Check if this row is ALSO a column header (some patterns match both)
-                cls = classify_row(cells)
-                if cls == 'header':
-                    # This is both a section marker AND a column header
-                    current_header_map = map_header_to_index(cells)
-                    in_data = True
-
-                # Add section header marker with all required fields
-                results.append({
+                # Create section header record
+                section_header_record = {
                     'section': section,  # Keep original section name
                     'row_index': row_index,
                     'raw': ','.join(cells),
@@ -625,7 +633,35 @@ def parse_file(
                     'price': None, 'net_price': None, 'price_improvement': None,
                     'order_type': None, 'tif': None, 'status': None,
                     'notes': None, 'mark': None,
-                })
+                }
+
+                # Check if this row is ALSO a column header (some patterns match both)
+                cls = classify_row(cells)
+                if cls == 'header':
+                    # This is both a section marker AND a column header
+                    header_map = map_header_to_index(cells)
+
+                    if skip_empty_sections:
+                        # Buffer both headers
+                        buffered_section_header = section_header_record
+                        buffered_column_header = section_header_record  # Same record in this case
+                        buffered_header_map = header_map
+                    else:
+                        # Emit immediately
+                        results.append(section_header_record)
+                        current_header_map = header_map
+                        in_data = True
+                else:
+                    # Section marker only, no column header yet
+                    if skip_empty_sections:
+                        # Buffer section header
+                        buffered_section_header = section_header_record
+                        buffered_column_header = None
+                        buffered_header_map = None
+                    else:
+                        # Emit immediately
+                        results.append(section_header_record)
+
                 continue
 
             # Skip Rolling Strategies if not included
@@ -636,11 +672,10 @@ def parse_file(
             cls = classify_row(cells)
 
             if cls == 'header':
-                current_header_map = map_header_to_index(cells)
-                in_data = True
+                header_map = map_header_to_index(cells)
 
-                # Add header marker with all required fields
-                results.append({
+                # Create header record
+                header_record = {
                     'section': section,  # Keep original section name
                     'row_index': row_index,
                     'raw': ','.join(cells),
@@ -652,10 +687,35 @@ def parse_file(
                     'price': None, 'net_price': None, 'price_improvement': None,
                     'order_type': None, 'tif': None, 'status': None,
                     'notes': None, 'mark': None,
-                })
+                }
+
+                if skip_empty_sections:
+                    # Buffer the column header
+                    buffered_column_header = header_record
+                    buffered_header_map = header_map
+                else:
+                    # Emit immediately
+                    results.append(header_record)
+                    current_header_map = header_map
+                    in_data = True
+
                 continue
             elif cls == 'noise':
                 continue
+
+            # Check if we have buffered headers to emit (this is a data row)
+            if skip_empty_sections and buffered_section_header is not None:
+                # Emit buffered section header
+                results.append(buffered_section_header)
+                buffered_section_header = None
+
+            if skip_empty_sections and buffered_column_header is not None:
+                # Emit buffered column header
+                results.append(buffered_column_header)
+                current_header_map = buffered_header_map
+                in_data = True
+                buffered_column_header = None
+                buffered_header_map = None
 
             if not in_data or not current_header_map:
                 continue
@@ -668,7 +728,13 @@ def parse_file(
             if rec:
                 results.append(rec)
 
-    return results
+    # If we still have buffered headers at end of file, they belong to empty section
+    if skip_empty_sections and buffered_section_header is not None:
+        sections_skipped += 1
+        if verbose:
+            click.echo(f"Skipping empty section at end: {buffered_section_header['section']}", err=True)
+
+    return results, sections_skipped
 
 
 def validate(records: List[Dict[str, Any]]) -> Dict[str, int]:
@@ -739,10 +805,15 @@ def cli():
 @click.option('--max-rows', type=int, metavar='N', help='Process only first N rows (for testing)')
 @click.option('--qty-unsigned', is_flag=True, help='Parse quantities as unsigned (absolute values)')
 @click.option('--qty-signed', is_flag=True, default=True, help='Parse quantities as signed (keep sign, default)')
+@click.option('--skip-empty-sections/--include-empty-sections', default=True,
+              help='Skip sections with no data rows (default: skip)')
+@click.option('--group-by-section/--preserve-file-order', default=True,
+              help='Group records by section across files and sort by time (default: group)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
 @click.option('--encoding', default='utf-8', help='CSV file encoding (default: utf-8)')
 def convert(input_csv, output_json, include_rolling, format_json, output_ndjson, pretty,
-         preview, section_patterns_file, max_rows, qty_unsigned, qty_signed, verbose, encoding):
+         preview, section_patterns_file, max_rows, qty_unsigned, qty_signed,
+         skip_empty_sections, group_by_section, verbose, encoding):
     """
     Convert Schwab CSV trade activity reports to JSON/NDJSON format.
 
@@ -779,7 +850,9 @@ def convert(input_csv, output_json, include_rolling, format_json, output_ndjson,
             section_patterns=section_patterns,
             max_rows=max_rows,
             qty_unsigned=qty_unsigned,
-            verbose=verbose
+            verbose=verbose,
+            skip_empty_sections=skip_empty_sections,
+            group_by_section=group_by_section
         )
 
         # Progress callback for verbose mode
@@ -806,6 +879,8 @@ def convert(input_csv, output_json, include_rolling, format_json, output_ndjson,
         click.echo(f"Batch processing complete:", err=True)
         click.echo(f"  Files processed: {result.successful_files}/{result.total_files}", err=True)
         click.echo(f"  Total records: {result.total_records}", err=True)
+        if result.sections_skipped > 0 and verbose:
+            click.echo(f"  Sections skipped: {result.sections_skipped}", err=True)
         if result.failed_files > 0:
             click.echo(f"  Failed files: {result.failed_files}", err=True)
             for file_path, error in result.file_errors.items():
@@ -825,17 +900,21 @@ def convert(input_csv, output_json, include_rolling, format_json, output_ndjson,
         if verbose:
             click.echo(f"Parsing {input_file}...", err=True)
 
-        records = parse_file(
+        records, sections_skipped = parse_file(
             input_file,
             include_rolling=include_rolling,
             section_patterns=section_patterns,
             max_rows=max_rows,
             qty_unsigned=qty_unsigned,
-            verbose=verbose
+            verbose=verbose,
+            skip_empty_sections=skip_empty_sections
         )
 
         # Validate records
         validation_issues = validate(records)
+
+        if sections_skipped > 0 and verbose:
+            click.echo(f"Skipped {sections_skipped} empty section(s)", err=True)
 
         # Write output
         if format_json or output_json.endswith('.json'):

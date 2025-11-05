@@ -72,6 +72,7 @@ class FileSelectionScreen(Screen):
         Binding("q", "quit", "Quit"),
         Binding("enter", "select_file", "Toggle Select"),
         Binding("s", "start_processing", "Start Processing"),
+        Binding("c", "clear_selection", "Clear All"),
         Binding("o", "set_output", "Set Output"),
     ]
 
@@ -84,11 +85,23 @@ class FileSelectionScreen(Screen):
         yield Header()
         yield Container(
             Static("Select CSV files to process:", id="title"),
-            Static("Use ↑/↓ to navigate, ENTER to select, 's' to start", id="help"),
-            DirectoryTree(".", id="file_tree"),
+            Static("🎯 Multi-Select Mode: ENTER to toggle selection, 's' to start, 'c' to clear all", id="help"),
+            Horizontal(
+                Container(
+                    Static("📁 Browse Files", id="tree_title"),
+                    DirectoryTree(".", id="file_tree"),
+                    id="tree_container",
+                ),
+                Container(
+                    Static("✓ Selected Files (0)", id="selected_title"),
+                    ScrollableContainer(id="selected_list"),
+                    id="selected_container",
+                ),
+            ),
             Container(
-                Static("Selected files: 0", id="selected_count"),
+                Static("No files selected", id="selected_count"),
                 Button("Start Processing (s)", id="start_btn", variant="primary"),
+                Button("Clear All (c)", id="clear_btn"),
                 Button("Quit (q)", id="quit_btn"),
                 id="button_bar",
             ),
@@ -117,9 +130,33 @@ class FileSelectionScreen(Screen):
         else:
             self.app_state.selected_files.append(file_path)
 
-        # Update count
-        count_label = self.query_one("#selected_count", Static)
-        count_label.update(f"Selected files: {len(self.app_state.selected_files)}")
+        # Update UI
+        self.update_selection_display()
+
+    def update_selection_display(self) -> None:
+        """Update the selected files display."""
+        count = len(self.app_state.selected_files)
+
+        # Update title
+        title = self.query_one("#selected_title", Static)
+        title.update(f"✓ Selected Files ({count})")
+
+        # Update selected files list
+        selected_list = self.query_one("#selected_list", ScrollableContainer)
+        selected_list.remove_children()
+
+        if count > 0:
+            for idx, file_path in enumerate(self.app_state.selected_files):
+                filename = Path(file_path).name
+                selected_list.mount(Static(f"☑ {idx + 1}. {filename}", classes="selected_file"))
+
+            # Update count label
+            count_label = self.query_one("#selected_count", Static)
+            count_label.update(f"✓ {count} file{'s' if count != 1 else ''} selected")
+        else:
+            selected_list.mount(Static("(none)", classes="no_selection"))
+            count_label = self.query_one("#selected_count", Static)
+            count_label.update("No files selected")
 
     def action_select_file(self) -> None:
         """Toggle file selection."""
@@ -127,6 +164,11 @@ class FileSelectionScreen(Screen):
         if tree.cursor_node:
             # Simulate file selected event
             pass
+
+    def action_clear_selection(self) -> None:
+        """Clear all selected files."""
+        self.app_state.selected_files.clear()
+        self.update_selection_display()
 
     def action_start_processing(self) -> None:
         """Start processing selected files."""
@@ -150,6 +192,8 @@ class FileSelectionScreen(Screen):
         """Handle button presses."""
         if event.button.id == "start_btn":
             self.action_start_processing()
+        elif event.button.id == "clear_btn":
+            self.action_clear_selection()
         elif event.button.id == "quit_btn":
             self.action_quit()
 
@@ -399,9 +443,47 @@ class SchwabTUI(App):
         padding-bottom: 1;
     }
 
+    Horizontal {
+        height: 1fr;
+    }
+
+    #tree_container {
+        width: 3fr;
+        height: 1fr;
+    }
+
+    #selected_container {
+        width: 2fr;
+        height: 1fr;
+        border: solid $accent;
+    }
+
+    #tree_title, #selected_title {
+        color: $accent;
+        text-style: bold;
+        padding: 0 1;
+        background: $panel;
+    }
+
     #file_tree {
         height: 1fr;
         border: solid $primary;
+    }
+
+    #selected_list {
+        height: 1fr;
+        padding: 1;
+    }
+
+    .selected_file {
+        color: $success;
+        padding: 0 1;
+    }
+
+    .no_selection {
+        color: $text-muted;
+        text-align: center;
+        padding: 2;
     }
 
     #button_bar {
@@ -414,6 +496,8 @@ class SchwabTUI(App):
     #selected_count {
         padding: 1;
         text-align: center;
+        color: $accent;
+        text-style: bold;
     }
 
     Button {

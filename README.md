@@ -8,8 +8,10 @@ Schwab trade activity CSVs contain multiple logical sections (Filled Orders, Wor
 
 ## Features
 
-- **Interactive TUI Mode**: Terminal UI for selecting and batch-processing multiple files
+- **Interactive TUI Mode**: Terminal UI with multi-select file browser and visual selection indicators
 - **Batch Processing**: Process multiple CSV files into a single merged output
+- **Smart Section Filtering**: Automatically skips empty sections (headers with no data rows)
+- **Section Grouping & Sorting**: Groups records by section across files and sorts by timestamp
 - **Multi-section parsing**: Automatically detects and processes different sections in Schwab CSVs
 - **Flexible output formats**: NDJSON (default) or JSON array
 - **Field normalization**: Parses quantities, prices, and timestamps with proper type handling
@@ -93,6 +95,8 @@ Available options:
 - `--preview N`: Print first N output records to stdout
 - `--max-rows N`: Process only first N CSV rows (0 = all)
 - `--qty-signed/--qty-unsigned`: Handle quantity signs (default: signed)
+- `--skip-empty-sections/--include-empty-sections`: Skip sections with no data rows (default: skip)
+- `--group-by-section/--preserve-file-order`: Group records by section and sort by time (default: group)
 - `--verbose, -v`: Enable debug logging with progress updates
 - `--section-patterns-file PATH`: Custom JSON file with section detection patterns
 - `--include-rolling`: Include Rolling Strategies section
@@ -187,10 +191,10 @@ schwab-csv-to-json/
 ├── main.py                 # Main CLI entry point with convert/tui commands
 ├── batch.py                # Batch processing module for multiple files
 ├── tui.py                  # Textual TUI application (4 screens)
-├── tests/                  # Test suite (110 tests, all passing)
+├── tests/                  # Test suite (123 tests, all passing)
 │   ├── test_main.py        # Unit tests (76 tests)
 │   ├── test_integration.py # Integration tests (19 tests)
-│   └── test_batch.py       # Batch processing tests (15 tests)
+│   └── test_batch.py       # Batch processing tests (28 tests)
 ├── examples/               # Sample CSV files
 ├── patterns.json           # Default section detection patterns
 ├── pyproject.toml          # Project dependencies

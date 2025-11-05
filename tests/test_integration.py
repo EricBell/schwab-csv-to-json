@@ -198,14 +198,16 @@ class TestRealWorldScenarios:
         with self.runner.isolated_filesystem():
             with open('test_input.csv', 'w') as f:
                 f.write('Working Orders\n')
-                f.write('Notes,,Time Placed,Side,Qty\n')
+                f.write('Notes,,Time Placed,Side,Qty,Symbol\n')
+                f.write(',,10/24/25 08:00:00,BUY,50,WORK\n')  # Added data row
                 f.write('\n')
                 f.write('Filled Orders\n')
                 f.write(',,Exec Time,Spread,Side,Qty,Symbol,Price,Net Price,Order Type\n')
                 f.write(',,10/24/25 09:51:38,STOCK,SELL,-75,NEUP,8.30,8.30,MKT\n')
                 f.write('\n')
                 f.write('Canceled Orders\n')
-                f.write('Notes,,Time Canceled,Side,Qty\n')
+                f.write('Notes,,Time Canceled,Side,Qty,Symbol\n')
+                f.write(',,10/24/25 07:00:00,SELL,100,CANCEL\n')  # Added data row
 
             result = self.runner.invoke(main, ['test_input.csv', 'output.ndjson'])
 

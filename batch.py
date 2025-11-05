@@ -7,9 +7,11 @@ This module provides functionality to process multiple Schwab CSV files
 and merge their output into a single file with source file metadata.
 """
 
-from typing import List, Dict, Any, Optional, Callable
+from typing import List, Dict, Any, Optional, Callable, Tuple
 from pathlib import Path
 from dataclasses import dataclass
+from collections import OrderedDict
+from datetime import datetime
 
 
 @dataclass
@@ -30,6 +32,12 @@ class BatchOptions:
 
     verbose: bool = False
     """Enable verbose logging."""
+
+    skip_empty_sections: bool = True
+    """Skip sections that have only headers with no data rows."""
+
+    group_by_section: bool = True
+    """Group records by section across files and sort by time."""
 
 
 @dataclass
@@ -59,6 +67,93 @@ class FileProgress:
 ProgressCallback = Callable[[FileProgress], None]
 
 
+def get_sort_time(record: Dict[str, Any]) -> Optional[datetime]:
+    """
+    Extract the appropriate time field for sorting.
+
+    Priority: exec_time > time_canceled > time_placed
+    Returns None if no time field is available or parseable.
+    """
+    # Try exec_time first
+    exec_time_str = record.get('exec_time')
+    if exec_time_str:
+        try:
+            return datetime.fromisoformat(exec_time_str)
+        except (ValueError, TypeError):
+            pass
+
+    # Try time_canceled
+    time_canceled_str = record.get('time_canceled')
+    if time_canceled_str:
+        try:
+            return datetime.fromisoformat(time_canceled_str)
+        except (ValueError, TypeError):
+            pass
+
+    # Try time_placed
+    time_placed_str = record.get('time_placed')
+    if time_placed_str:
+        try:
+            return datetime.fromisoformat(time_placed_str)
+        except (ValueError, TypeError):
+            pass
+
+    return None
+
+
+def group_and_sort_records(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Group records by section and sort by time within each section.
+
+    Args:
+        records: List of all records from batch processing
+
+    Returns:
+        Reordered list with records grouped by section and sorted by time
+    """
+    # Separate section headers from data records
+    section_headers: Dict[str, Dict[str, Any]] = {}
+    data_records_by_section: Dict[str, List[Dict[str, Any]]] = {}
+
+    for record in records:
+        section = record.get('section', 'Unknown')
+        is_header = 'section_header' in record.get('issues', [])
+
+        if is_header:
+            # Keep only the first section header for each section
+            if section not in section_headers:
+                section_headers[section] = record
+        else:
+            # Group data records by section
+            if section not in data_records_by_section:
+                data_records_by_section[section] = []
+            data_records_by_section[section].append(record)
+
+    # Sort data records within each section by time
+    for section, section_records in data_records_by_section.items():
+        section_records.sort(key=lambda r: (
+            get_sort_time(r) is None,  # Records with no time go last
+            get_sort_time(r) if get_sort_time(r) is not None else datetime.max
+        ))
+
+    # Reconstruct output: section header + sorted data records for each section
+    result = []
+
+    # Define section order (alphabetical)
+    section_order = sorted(section_headers.keys())
+
+    for section in section_order:
+        # Add section header first
+        if section in section_headers:
+            result.append(section_headers[section])
+
+        # Add sorted data records
+        if section in data_records_by_section:
+            result.extend(data_records_by_section[section])
+
+    return result
+
+
 @dataclass
 class BatchResult:
     """Results from batch processing operation."""
@@ -80,6 +175,9 @@ class BatchResult:
 
     file_errors: Dict[str, str]
     """Map of file path to error message for failed files."""
+
+    sections_skipped: int = 0
+    """Number of empty sections skipped during processing."""
 
 
 def process_multiple_files(
@@ -132,6 +230,7 @@ def process_multiple_files(
     successful_files = 0
     failed_files = 0
     total_records = 0
+    total_sections_skipped = 0
     aggregated_validation_issues: Dict[str, int] = {}
     file_errors: Dict[str, str] = {}
     all_records: List[Dict[str, Any]] = []
@@ -151,7 +250,8 @@ def process_multiple_files(
                 progress_callback(progress)
 
             # Process the file
-            records = process_single_file_for_batch(file_path, file_index, options)
+            records, sections_skipped = process_single_file_for_batch(file_path, file_index, options)
+            total_sections_skipped += sections_skipped
 
             # Validate and aggregate issues
             validation_issues = validate(records)
@@ -207,6 +307,10 @@ def process_multiple_files(
                 )
                 progress_callback(progress)
 
+    # Group and sort records if requested
+    if options.group_by_section and all_records:
+        all_records = group_and_sort_records(all_records)
+
     # Write output file
     if all_records:
         with open(output_path, 'w', encoding='utf-8') as out:
@@ -219,7 +323,8 @@ def process_multiple_files(
         failed_files=failed_files,
         total_records=total_records,
         validation_issues=aggregated_validation_issues,
-        file_errors=file_errors
+        file_errors=file_errors,
+        sections_skipped=total_sections_skipped
     )
 
 
@@ -227,7 +332,7 @@ def process_single_file_for_batch(
     file_path: str,
     file_index: int,
     options: BatchOptions
-) -> List[Dict[str, Any]]:
+) -> Tuple[List[Dict[str, Any]], int]:
     """
     Process a single file for batch processing.
 
@@ -240,18 +345,19 @@ def process_single_file_for_batch(
         options: Batch processing options
 
     Returns:
-        List of records with source_file metadata added
+        Tuple of (list of records with source_file metadata added, sections_skipped count)
     """
     from main import parse_file
 
     # Parse the file using main.py's parse_file function
-    records = parse_file(
+    records, sections_skipped = parse_file(
         path=file_path,
         include_rolling=options.include_rolling,
         section_patterns=options.section_patterns,
         max_rows=options.max_rows,
         qty_unsigned=options.qty_unsigned,
-        verbose=options.verbose
+        verbose=options.verbose,
+        skip_empty_sections=options.skip_empty_sections
     )
 
     # Add source file metadata to each record
@@ -260,4 +366,4 @@ def process_single_file_for_batch(
         record['source_file'] = source_filename
         record['source_file_index'] = file_index
 
-    return records
+    return records, sections_skipped
