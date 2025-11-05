@@ -1,0 +1,22 @@
+﻿Today's Trade Activity for acct (Individual) on 10/21/25 16:02:23
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,10/21/25 15:59:39,SINGLE,BUY,+3,TO OPEN,SPY,21 OCT 25,673,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.10,STP,STD,
+,,10/21/25 15:47:41,SINGLE,BUY,+1,TO OPEN,SPY,21 OCT 25,671,PUT,~,MKT,DAY,CANCELED
+,,,RE #1004472617396,,,,,,,,.23,STP,STD,
+,,10/21/25 15:47:43,SINGLE,BUY,+1,TO OPEN,SPY,21 OCT 25,673,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.25,STP,STD,
+,,10/21/25 15:41:30,SINGLE,BUY,+1,TO OPEN,SPY,21 OCT 25,671,PUT,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.30,STP,STD,
+,,10/21/25 15:11:33,SINGLE,BUY,+1,TO OPEN,SPY,21 OCT 25,672,PUT,.40,LMT,DAY,CANCELED
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

@@ -1,0 +1,34 @@
+﻿Today's Trade Activity for acct (Individual) on 10/8/25 19:54:36
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,10/8/25 15:13:27,STOCK,SELL,-140,TO CLOSE,SLNH,,,STOCK,2.835,2.835,.70,MKT
+,,10/8/25 15:12:05,STOCK,SELL,-30,TO CLOSE,SLNH,,,STOCK,2.831,2.831,.03,MKT
+,,10/8/25 15:09:02,STOCK,SELL,-30,TO CLOSE,SLNH,,,STOCK,2.7301,2.73,.003,MKT
+,,10/8/25 15:07:00,STOCK,BUY,+200,TO OPEN,SLNH,,,STOCK,2.6782,2.6782,.36,MKT
+,,10/8/25 10:19:03,STOCK,SELL,-100,TO CLOSE,POET,,,STOCK,8.67,8.67,-,STP
+,,10/8/25 10:04:41,STOCK,BUY,+100,TO OPEN,POET,,,STOCK,8.8382,8.8382,.18,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,10/8/25 15:35:34,STOCK,BUY,+200,TO OPEN,POET,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,9.15,STP,STD,
+,,10/8/25 15:13:22,STOCK,SELL,-140,TO CLOSE,SLNH,,,STOCK,~,MKT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,10/8/25 15:13:24,STOCK,SELL,-140,TO CLOSE,SLNH,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,2.73,STP,STD,
+,,10/8/25 15:12:02,STOCK,SELL,-170,TO CLOSE,SLNH,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,2.58,STP,STD,
+,,10/8/25 15:08:55,STOCK,SELL,-200,TO CLOSE,SLNH,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,2.54,STP,STD,
+,,10/8/25 10:12:06,STOCK,SELL,-100,TO CLOSE,POET,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,8.40,STP,STD,
+,,10/8/25 09:57:20,STOCK,BUY,+80,TO OPEN,POET,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,8.70,STP,STD,
+,,10/8/25 09:56:37,STOCK,BUY,+100,TO OPEN,POET,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,8.70,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

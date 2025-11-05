@@ -1,0 +1,28 @@
+﻿Today's Trade Activity for acct (Individual) on 10/28/25 15:59:35
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,10/28/25 15:55:15,STOCK,SELL,-20,TO CLOSE,CSX,,,STOCK,35.605,35.605,.10,MKT
+,,10/28/25 15:54:28,STOCK,BUY,+20,TO OPEN,CSX,,,STOCK,35.5257,35.5255,.086,MKT
+,,10/28/25 15:44:55,STOCK,SELL,-100,TO CLOSE,POLA,,,STOCK,4.1618,4.1618,.18,MKT
+,,10/28/25 15:42:21,STOCK,BUY,+100,TO OPEN,POLA,,,STOCK,4.1899,4.1899,.01,LMT
+,,10/28/25 15:40:41,STOCK,SELL,-100,TO CLOSE,POLA,,,STOCK,4.17,4.17,2.00,LMT
+,,10/28/25 15:40:27,STOCK,BUY,+33,TO OPEN,POLA,,,STOCK,4.18,4.18,-,LMT
+,,10/28/25 15:40:27,STOCK,BUY,+67,TO OPEN,POLA,,,STOCK,4.18,4.18,-,LMT
+,,10/28/25 09:41:26,STOCK,SELL,-100,TO CLOSE,POLA,,,STOCK,4.24,4.24,1.00,MKT
+,,10/28/25 09:39:29,STOCK,BUY,+100,TO OPEN,POLA,,,STOCK,4.2365,4.2365,.35,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,10/28/25 15:55:14,STOCK,SELL,-20,TO CLOSE,CSX,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,35.53,STP,STD,
+,,10/28/25 15:37:42,STOCK,BUY,+100,TO OPEN,POLA,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,4.21,STP,STD,
+,,10/28/25 13:33:53,STOCK,BUY,+100,TO OPEN,BBAI,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,7.04,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

@@ -1,0 +1,30 @@
+﻿Today's Trade Activity for acct (Individual) on 10/20/25 22:06:25
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,10/20/25 15:52:00,SINGLE,SELL,-3,TO CLOSE,SPY,20 OCT 25,672,CALL,.17,.17,-,STP
+,,10/20/25 15:48:34,SINGLE,BUY,+3,TO OPEN,SPY,20 OCT 25,672,CALL,.25,.25,-,STP
+,,10/20/25 15:45:46,SINGLE,SELL,-3,TO CLOSE,SPY,20 OCT 25,671,PUT,.06,.06,-,MKT
+,,10/20/25 15:43:23,SINGLE,BUY,+3,TO OPEN,SPY,20 OCT 25,671,PUT,.09,.09,3.00,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,10/20/25 15:43:26,SINGLE,BUY,+3,TO OPEN,SPY,20 OCT 25,671,PUT,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.31,STP,STD,
+,,10/20/25 15:32:16,SINGLE,BUY,+3,TO OPEN,SPY,20 OCT 25,670,PUT,~,MKT,DAY,CANCELED
+,,,RE #1004460543171,,,,,,,,.11,STP,STD,
+,,10/20/25 15:23:38,SINGLE,BUY,+3,TO OPEN,SPY,20 OCT 25,670,PUT,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.10,STP,STD,
+,,10/20/25 15:02:54,SINGLE,BUY,+3,TO OPEN,SPY,20 OCT 25,672,CALL,.30,LMT,DAY,CANCELED
+,,10/20/25 15:18:19,SINGLE,BUY,+3,TO OPEN,SPY,20 OCT 25,670,PUT,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.22,STP,STD,
+,,10/20/25 14:38:14,STOCK,BUY,+200,TO OPEN,AREC,,,STOCK,4.46,LMT,DAY,CANCELED
+,,,RE #1004459735067,,,,,,,,,,,
+,,10/20/25 14:37:12,STOCK,BUY,+200,TO OPEN,AREC,,,STOCK,4.47,LMT,DAY,CANCELED
+,,10/20/25 14:32:56,STOCK,BUY,+200,TO OPEN,AREC,,,STOCK,4.41,LMT,DAY,CANCELED
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

@@ -1,0 +1,17 @@
+﻿Today's Trade Activity for acct (Individual) on 10/9/25 21:06:38
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,10/9/25 09:57:55,STOCK,SELL,-100,TO CLOSE,TTRX,,,STOCK,22.001,22.001,-,STP
+,,10/9/25 09:50:55,STOCK,SELL,-300,TO CLOSE,DFLI,,,STOCK,1.35,1.35,-,STP
+,,10/9/25 09:46:57,STOCK,BUY,+300,TO OPEN,DFLI,,,STOCK,1.3986,1.3986,.42,MKT
+,,10/9/25 09:30:02,STOCK,BUY,+100,TO OPEN,TTRX,,,STOCK,24.50,24.50,-,LMT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

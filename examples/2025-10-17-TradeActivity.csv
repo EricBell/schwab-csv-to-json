@@ -1,0 +1,26 @@
+﻿Today's Trade Activity for acct (Individual) on 10/17/25 21:26:17
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,10/17/25 10:36:06,STOCK,SELL,-4,TO CLOSE,ACHV,,,STOCK,4.0927,4.0925,.27,MKT
+,,10/17/25 10:36:06,STOCK,SELL,-96,TO CLOSE,ACHV,,,STOCK,4.0927,4.09271,.27,MKT
+,,10/17/25 10:25:24,STOCK,BUY,+100,TO OPEN,ACHV,,,STOCK,4.045,4.045,.50,MKT
+,,10/17/25 10:20:30,STOCK,SELL,-100,TO CLOSE,ACHV,,,STOCK,3.96,3.96,-,STP
+,,10/17/25 10:12:47,STOCK,BUY,+100,TO OPEN,ACHV,,,STOCK,4.215,4.215,.50,MKT
+,,10/17/25 10:12:10,STOCK,SELL,-50,TO CLOSE,BTQ,,,STOCK,11.7525,11.7524,.625,MKT
+,,10/17/25 10:08:50,STOCK,BUY,+50,TO OPEN,BTQ,,,STOCK,11.9069,11.9068,2.155,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,10/17/25 10:36:02,STOCK,SELL,-50,TO CLOSE,ACHV,,,STOCK,4.44,LMT,DAY,CANCELED
+,,10/17/25 10:36:03,STOCK,SELL,-25,TO CLOSE,ACHV,,,STOCK,4.22,LMT,DAY,CANCELED
+,,10/17/25 10:27:47,STOCK,SELL,-100,TO CLOSE,ACHV,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,3.70,STP,STD,
+,,10/17/25 10:12:04,STOCK,SELL,-50,TO CLOSE,BTQ,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,11.09,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

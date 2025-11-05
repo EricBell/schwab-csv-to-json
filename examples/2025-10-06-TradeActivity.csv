@@ -1,0 +1,26 @@
+﻿Today's Trade Activity for acct (Individual) on 10/6/25 15:44:53
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,10/6/25 15:42:13,STOCK,SELL,-50,TO CLOSE,SERV,,,STOCK,15.05,15.05,-,STP
+,,10/6/25 15:37:15,STOCK,BUY,+50,TO OPEN,SERV,,,STOCK,15.13,15.13,.50,MKT
+,,10/6/25 15:29:15,STOCK,SELL,-50,TO CLOSE,SERV,,,STOCK,15.0119,15.012,.095,MKT
+,,10/6/25 15:25:48,STOCK,BUY,+50,TO OPEN,SERV,,,STOCK,15.015,15.015,.25,LMT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,10/6/25 15:36:31,STOCK,BUY,+50,TO OPEN,SERV,,,STOCK,15.08,LMT,DAY,CANCELED
+,,,RE #1004330645632,,,,,,,,,,,
+,,10/6/25 15:35:59,STOCK,BUY,+50,TO OPEN,SERV,,,STOCK,15.05,LMT,DAY,CANCELED
+,,10/6/25 15:29:14,STOCK,SELL,-50,TO CLOSE,SERV,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,14.94,STP,STD,
+,,10/6/25 15:23:43,STOCK,BUY,+50,TO OPEN,RCAT,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,14.88,STP,STD,
+,,10/6/25 15:23:02,STOCK,BUY,+50,TO OPEN,RCAT,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,14.88,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

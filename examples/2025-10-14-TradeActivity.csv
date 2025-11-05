@@ -1,0 +1,29 @@
+﻿Today's Trade Activity for acct (Individual) on 10/14/25 16:12:05
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,10/14/25 10:16:22,STOCK,SELL,-200,TO CLOSE,LODE,,,STOCK,4.3673,4.3673,3.46,MKT
+,,10/14/25 10:10:41,STOCK,BUY,+200,TO OPEN,LODE,,,STOCK,4.39,4.39,2.00,LMT
+,,10/14/25 10:05:53,STOCK,SELL,-200,TO CLOSE,LODE,,,STOCK,4.33,4.33,-,STP
+,,10/14/25 09:46:09,STOCK,BUY,+90,TO OPEN,LODE,,,STOCK,4.4963,4.49633,.74,MKT
+,,10/14/25 09:46:09,STOCK,BUY,+20,TO OPEN,LODE,,,STOCK,4.4963,4.4965,.74,MKT
+,,10/14/25 09:46:09,STOCK,BUY,+90,TO OPEN,LODE,,,STOCK,4.4963,4.49633,.74,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,10/14/25 10:16:21,STOCK,SELL,-200,TO CLOSE,LODE,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,4.30,STP,STD,
+,,10/14/25 10:10:29,STOCK,BUY,+200,TO OPEN,LODE,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,4.40,STP,STD,
+,,10/14/25 10:01:56,STOCK,SELL,-200,TO CLOSE,LODE,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004398715481,,,,,,,,4.32,STP,STD,
+,,10/14/25 09:56:47,STOCK,SELL,-200,TO CLOSE,LODE,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004398715465,,,,,,,,4.27,STP,STD,
+,,10/14/25 09:46:22,STOCK,SELL,-200,TO CLOSE,LODE,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,4.19,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

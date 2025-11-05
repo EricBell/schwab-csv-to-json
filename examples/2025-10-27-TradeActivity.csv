@@ -1,0 +1,26 @@
+﻿Today's Trade Activity for acct (Individual) on 10/27/25 15:55:16
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,10/27/25 14:55:18,STOCK,SELL,-40,TO CLOSE,PATH,,,STOCK,17.36,17.36,-,STP
+,,10/27/25 14:20:51,STOCK,SELL,-10,TO CLOSE,PATH,,,STOCK,17.47,17.47,-,LMT
+,,10/27/25 13:45:31,STOCK,BUY,+50,TO OPEN,PATH,,,STOCK,17.365,17.365,.25,MKT
+,,10/27/25 10:26:38,STOCK,SELL,-250,TO CLOSE,TGL,,,STOCK,1.0444,1.0444,1.10,MKT
+,,10/27/25 10:14:08,STOCK,SELL,-50,TO CLOSE,TGL,,,STOCK,1.1532,1.1532,.16,MKT
+,,10/27/25 10:08:16,STOCK,BUY,+300,TO OPEN,TGL,,,STOCK,1.065,1.065,1.50,LMT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,10/27/25 14:20:15,STOCK,SELL,-50,TO CLOSE,PATH,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,16.50,STP,STD,
+,,10/27/25 10:26:36,STOCK,SELL,-50,TO CLOSE,TGL,,,STOCK,1.17,LMT,DAY,CANCELED
+,,10/27/25 10:13:54,STOCK,SELL,-300,TO CLOSE,TGL,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004515702576,,,,,,,,.9119,STP,STD,
+,,10/27/25 10:08:38,STOCK,SELL,-300,TO CLOSE,TGL,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,1.02,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status
