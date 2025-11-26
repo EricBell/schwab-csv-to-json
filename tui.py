@@ -36,6 +36,45 @@ from rich.table import Table as RichTable
 from batch import process_multiple_files, BatchOptions, FileProgress, BatchResult
 
 
+def normalize_starting_dir(starting_dir: Optional[str]) -> str:
+    """
+    Normalize and validate the starting directory path.
+
+    Handles:
+    - Relative paths (resolved to absolute)
+    - Home directory expansion (~)
+    - Path validation (must exist and be a directory)
+    - Invalid paths fall back to current directory
+
+    Args:
+        starting_dir: Path to normalize (can be None, empty, relative, or absolute)
+
+    Returns:
+        Normalized absolute path, or "." if path is invalid
+    """
+    # Handle None or empty string
+    if not starting_dir:
+        return "."
+
+    try:
+        # Expand user home directory (~)
+        path = Path(starting_dir).expanduser()
+
+        # Resolve to absolute path (handles relative paths)
+        path = path.resolve()
+
+        # Validate: path must exist and be a directory
+        if path.exists() and path.is_dir():
+            return str(path)
+        else:
+            # Invalid path, fall back to current directory
+            return "."
+
+    except (OSError, RuntimeError, ValueError):
+        # Any path-related error, fall back to current directory
+        return "."
+
+
 @dataclass
 class AppState:
     """Application state for the TUI."""
@@ -76,9 +115,10 @@ class FileSelectionScreen(Screen):
         Binding("o", "set_output", "Set Output"),
     ]
 
-    def __init__(self, app_state: AppState):
+    def __init__(self, app_state: AppState, starting_dir: str = "."):
         super().__init__()
         self.app_state = app_state
+        self.starting_dir = starting_dir
 
     def compose(self) -> ComposeResult:
         """Compose the file selection screen."""
@@ -89,7 +129,7 @@ class FileSelectionScreen(Screen):
             Horizontal(
                 Container(
                     Static("📁 Browse Files", id="tree_title"),
-                    DirectoryTree(".", id="file_tree"),
+                    DirectoryTree(self.starting_dir, id="file_tree"),
                     id="tree_container",
                 ),
                 Container(
@@ -544,13 +584,13 @@ class SchwabTUI(App):
     def __init__(self, starting_dir: str = ".", output_path: str = "output.ndjson"):
         super().__init__()
         self.app_state = AppState(output_path=output_path)
-        self.starting_dir = starting_dir
+        self.starting_dir = normalize_starting_dir(starting_dir)
 
     def on_mount(self) -> None:
         """Initialize the app."""
         self.title = "Schwab CSV Batch Processor"
         self.sub_title = "Select files to process"
-        self.push_screen(FileSelectionScreen(self.app_state))
+        self.push_screen(FileSelectionScreen(self.app_state, self.starting_dir))
 
     def action_quit(self) -> None:
         """Quit the application."""
