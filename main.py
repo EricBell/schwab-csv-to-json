@@ -448,6 +448,8 @@ def build_order_record(
         asset_type = 'OPTION'
     elif type_str == 'STOCK':
         asset_type = 'STOCK'
+    elif type_str == 'ETF':
+        asset_type = 'ETF'
 
     # Build option object
     option = None
