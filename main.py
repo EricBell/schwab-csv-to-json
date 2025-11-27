@@ -5,6 +5,7 @@
 import click
 import csv
 import json
+import os
 import re
 import sys
 from datetime import datetime
@@ -789,6 +790,169 @@ def validate(records: List[Dict[str, Any]]) -> Dict[str, int]:
     return issues
 
 
+def normalize_path(path_str: str) -> Path:
+    """
+    Normalize file path to absolute, resolved path.
+
+    Converts relative paths to absolute and resolves symlinks.
+
+    Args:
+        path_str: Path string to normalize
+
+    Returns:
+        Normalized Path object
+    """
+    return Path(path_str).resolve()
+
+
+def validate_output_not_input(input_paths: List[str], output_path: str) -> Optional[str]:
+    """
+    Validate that output path doesn't overwrite any input file.
+
+    Args:
+        input_paths: List of input file paths
+        output_path: Output file path
+
+    Returns:
+        Error message if collision detected, None if valid
+    """
+    output_normalized = normalize_path(output_path)
+    input_normalized = [normalize_path(p) for p in input_paths]
+
+    for input_path in input_normalized:
+        if output_normalized == input_path:
+            return (
+                f"Error: Output file would overwrite input file\n"
+                f"  Output: {output_path}\n"
+                f"  Collides with input: {input_path}\n\n"
+                f"Suggestion: Specify a different output file name:\n"
+                f"  uv run python main.py convert [input files...] output.ndjson"
+            )
+
+    return None
+
+
+def validate_csv_extension_warning(output_path: str) -> Optional[str]:
+    """
+    Warn if output file has .csv extension.
+
+    Args:
+        output_path: Output file path
+
+    Returns:
+        Warning message if .csv extension, None otherwise
+    """
+    if output_path.lower().endswith('.csv'):
+        return (
+            f"Warning: Output file has .csv extension\n"
+            f"  This may cause confusion as the output is JSON/NDJSON format, not CSV.\n"
+            f"  Recommended extensions: .ndjson, .json, .jsonl"
+        )
+
+    return None
+
+
+def validate_input_files_exist(input_paths: List[str]) -> List[str]:
+    """
+    Validate that all input files exist.
+
+    Args:
+        input_paths: List of input file paths
+
+    Returns:
+        List of error messages for missing files
+    """
+    errors = []
+
+    for path_str in input_paths:
+        path = Path(path_str)
+        if not path.exists():
+            errors.append(f"Error: Input file does not exist: {path_str}")
+        elif not path.is_file():
+            errors.append(f"Error: Input path is not a file: {path_str}")
+
+    return errors
+
+
+def validate_output_directory(output_path: str) -> Optional[str]:
+    """
+    Validate that output directory exists and is writable.
+
+    Args:
+        output_path: Output file path
+
+    Returns:
+        Error message if directory invalid, None if valid
+    """
+    output = Path(output_path)
+    parent_dir = output.parent
+
+    # Handle current directory case
+    if parent_dir == Path('.'):
+        parent_dir = Path.cwd()
+
+    if not parent_dir.exists():
+        return (
+            f"Error: Output directory does not exist: {parent_dir}\n"
+            f"  Create the directory first or specify a different path."
+        )
+
+    if not parent_dir.is_dir():
+        return f"Error: Output parent path is not a directory: {parent_dir}"
+
+    # Check if directory is writable
+    if not os.access(parent_dir, os.W_OK):
+        return f"Error: Output directory is not writable: {parent_dir}"
+
+    return None
+
+
+def validate_file_paths(
+    input_paths: List[str],
+    output_path: str,
+    force_overwrite: bool = False
+) -> List[str]:
+    """
+    Validate all file paths before processing.
+
+    Performs comprehensive validation:
+    - Input files exist
+    - Output directory exists and is writable
+    - Output doesn't overwrite input (unless force_overwrite)
+    - Warnings for .csv output extension
+
+    Args:
+        input_paths: List of input file paths
+        output_path: Output file path
+        force_overwrite: If True, skip output collision check
+
+    Returns:
+        List of error/warning messages (empty if all valid)
+    """
+    errors = []
+
+    # Check input files exist
+    errors.extend(validate_input_files_exist(input_paths))
+
+    # Check output directory
+    dir_error = validate_output_directory(output_path)
+    if dir_error:
+        errors.append(dir_error)
+
+    # Check output doesn't overwrite input (unless forced)
+    if not force_overwrite:
+        collision_error = validate_output_not_input(input_paths, output_path)
+        if collision_error:
+            errors.append(collision_error)
+
+    # Warn about .csv extension
+    csv_warning = validate_csv_extension_warning(output_path)
+    if csv_warning:
+        errors.append(csv_warning)
+
+    return errors
+
+
 @click.group()
 def cli():
     """Schwab CSV to JSON converter with TUI and CLI modes."""
@@ -796,7 +960,7 @@ def cli():
 
 
 @cli.command(name='convert')
-@click.argument('input_csv', nargs=-1, required=True, type=click.Path(exists=True), metavar='INPUT_CSV...')
+@click.argument('input_csv', nargs=-1, required=True, type=click.Path(), metavar='INPUT_CSV...')
 @click.argument('output_json', type=click.Path(), metavar='OUTPUT_JSON')
 @click.option('--include-rolling', is_flag=True, help='Include Rolling Strategies section')
 @click.option('--output-json', 'format_json', is_flag=True, help='Output as JSON array instead of NDJSON')
@@ -811,11 +975,12 @@ def cli():
               help='Skip sections with no data rows (default: skip)')
 @click.option('--group-by-section/--preserve-file-order', default=True,
               help='Group records by section across files and sort by time (default: group)')
+@click.option('--force-overwrite', is_flag=True, help='Force overwrite without safety checks (use with caution)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
 @click.option('--encoding', default='utf-8', help='CSV file encoding (default: utf-8)')
 def convert(input_csv, output_json, include_rolling, format_json, output_ndjson, pretty,
          preview, section_patterns_file, max_rows, qty_unsigned, qty_signed,
-         skip_empty_sections, group_by_section, verbose, encoding):
+         skip_empty_sections, group_by_section, force_overwrite, verbose, encoding):
     """
     Convert Schwab CSV trade activity reports to JSON/NDJSON format.
 
@@ -832,6 +997,32 @@ def convert(input_csv, output_json, include_rolling, format_json, output_ndjson,
 
     # Convert input_csv tuple to list
     input_files = list(input_csv)
+
+    # Validate file paths before processing
+    validation_errors = validate_file_paths(input_files, output_json, force_overwrite)
+
+    if validation_errors:
+        # Separate errors from warnings
+        fatal_errors = [err for err in validation_errors if err.startswith("Error:")]
+        warnings = [err for err in validation_errors if err.startswith("Warning:")]
+
+        # Display all errors and warnings
+        for error in fatal_errors:
+            click.echo(click.style(error, fg='red', bold=True), err=True)
+
+        for warning in warnings:
+            click.echo(click.style(warning, fg='yellow'), err=True)
+
+        # Exit if there are fatal errors
+        if fatal_errors:
+            click.echo("\nAbort: Cannot proceed due to validation errors.", err=True)
+            sys.exit(1)
+
+        # For warnings, ask for confirmation (unless force_overwrite is set)
+        if warnings and not force_overwrite:
+            if not click.confirm("\nDo you want to proceed anyway?", default=False):
+                click.echo("Operation cancelled.", err=True)
+                sys.exit(0)
 
     # Load custom section patterns if provided
     section_patterns = None

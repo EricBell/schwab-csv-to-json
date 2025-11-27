@@ -10,6 +10,7 @@ Schwab trade activity CSVs contain multiple logical sections (Filled Orders, Wor
 
 - **Interactive TUI Mode**: Terminal UI with multi-select file browser and visual selection indicators
 - **Batch Processing**: Process multiple CSV files into a single merged output
+- **Input File Protection**: Prevents accidental overwrites with comprehensive path validation
 - **Smart Section Filtering**: Automatically skips empty sections (headers with no data rows)
 - **Section Grouping & Sorting**: Groups records by section across files and sorts by timestamp
 - **Multi-section parsing**: Automatically detects and processes different sections in Schwab CSVs
@@ -97,9 +98,39 @@ Available options:
 - `--qty-signed/--qty-unsigned`: Handle quantity signs (default: signed)
 - `--skip-empty-sections/--include-empty-sections`: Skip sections with no data rows (default: skip)
 - `--group-by-section/--preserve-file-order`: Group records by section and sort by time (default: group)
+- `--force-overwrite`: Bypass safety checks and confirmation prompts (use with caution)
 - `--verbose, -v`: Enable debug logging with progress updates
 - `--section-patterns-file PATH`: Custom JSON file with section detection patterns
 - `--include-rolling`: Include Rolling Strategies section
+
+### Safety Features
+
+The tool includes built-in safety checks to prevent data loss:
+
+**Input File Protection**: The tool validates that the output file path doesn't match any input file paths, preventing accidental overwrites. If a collision is detected, the command will fail with a clear error message:
+
+```bash
+# This will fail with an error
+uv run python main.py convert file1.csv file2.csv file2.csv
+
+# Output:
+# Error: Output file would overwrite input file
+#   Output: file2.csv
+#   Collides with input: /path/to/file2.csv
+```
+
+**Extension Warnings**: If the output file has a `.csv` extension, you'll receive a warning since the output is JSON/NDJSON format, not CSV.
+
+**Directory Validation**: The tool checks that:
+- All input files exist before processing
+- The output directory exists and is writable
+- Paths are normalized (handles symlinks, relative paths correctly)
+
+To bypass safety checks and confirmation prompts, use `--force-overwrite`:
+
+```bash
+uv run python main.py convert input.csv output.csv --force-overwrite
+```
 
 ### Custom Section Patterns
 
@@ -191,9 +222,10 @@ schwab-csv-to-json/
 ├── main.py                 # Main CLI entry point with convert/tui commands
 ├── batch.py                # Batch processing module for multiple files
 ├── tui.py                  # Textual TUI application (4 screens)
-├── tests/                  # Test suite (123 tests, all passing)
+├── tests/                  # Test suite (152 tests, all passing)
 │   ├── test_main.py        # Unit tests (76 tests)
 │   ├── test_integration.py # Integration tests (19 tests)
+│   ├── test_validation.py  # File validation tests (16 tests)
 │   └── test_batch.py       # Batch processing tests (28 tests)
 ├── examples/               # Sample CSV files
 ├── patterns.json           # Default section detection patterns
