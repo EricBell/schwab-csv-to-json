@@ -461,6 +461,223 @@ This phase adds enhanced batch processing capabilities based on user feedback fr
   - tui.py: +60 lines (enhanced selection UI)
 - **Phases Completed**: 6/6 (100%)
 
+### Version 1.2 (In Progress) ⏳
+- **Status**: Phase 7 - Planning
+- **Target Tests**: 133+ (123 existing + 10 new validation tests)
+- **New Features**:
+  - Input file protection (prevent overwrites)
+  - Output path validation
+  - CSV extension warnings
+  - Force-overwrite safety flag
+- **CLI Additions**: --force-overwrite flag
+- **Estimated Code Additions**:
+  - main.py: +150 lines (validation functions and error handling)
+  - tests/test_validation.py: +250 lines (new test file)
+- **Phases Completed**: 6/7 (86%)
+
+---
+
+## Phase 7: Input File Protection (Version 1.2) ⏳ IN PROGRESS
+
+This phase adds file operation safety checks to prevent accidental data loss.
+
+**Status:** 🔄 Planning
+**Start Date:** 2025-11-27
+**Related PRD:** Section 11 (Phase 3 Requirements - Version 1.2)
+
+### 7.1 Design File Validation Architecture ⏳
+
+**Goal:** Design validation system to prevent input file overwrites
+
+- [ ] **Research Path Normalization**
+  - [ ] Review Python pathlib.Path.resolve() for absolute path conversion
+  - [ ] Review os.path.samefile() for path comparison (handles symlinks)
+  - [ ] Investigate case-sensitivity handling across platforms
+  - [ ] Document edge cases (symlinks, network drives, WSL paths)
+
+- [ ] **Design Validation Flow**
+  - [ ] Sketch validation function signature: `validate_file_paths(input_paths, output_path) -> Result`
+  - [ ] Define validation rules (output not in inputs, extension warnings)
+  - [ ] Design error message templates with suggestions
+  - [ ] Plan where validation occurs (before parse_file, before batch processing)
+
+- [ ] **Define Error Handling Strategy**
+  - [ ] Decide: Fail-fast vs warning + confirmation prompt
+  - [ ] Design `--force-overwrite` flag behavior
+  - [ ] Plan user interaction for existing file overwrites
+  - [ ] Document exit codes for different failure modes
+
+### 7.2 Write File Validation Tests (TDD) ⏳
+
+**Goal:** Write comprehensive tests before implementing validation
+
+- [ ] **Test: Output Overwrites Input (Single File)**
+  - [ ] Test: `convert input.csv input.csv` should fail with error
+  - [ ] Test: Error message includes both paths
+  - [ ] Test: Error message includes suggestion
+
+- [ ] **Test: Output Overwrites Input (Batch Mode)**
+  - [ ] Test: `convert file1.csv file2.csv file3.csv file3.csv` should fail
+  - [ ] Test: Output in middle of input list detected
+  - [ ] Test: All input paths checked, not just last one
+
+- [ ] **Test: CSV Extension Warning**
+  - [ ] Test: Output with `.csv` extension triggers warning
+  - [ ] Test: Warning is non-fatal (allows continuation with confirmation)
+  - [ ] Test: Warning message explains risk of confusion
+
+- [ ] **Test: Path Normalization**
+  - [ ] Test: Relative vs absolute paths compared correctly
+  - [ ] Test: `./output.csv` vs `output.csv` detected as same file
+  - [ ] Test: Symlinks resolved before comparison
+  - [ ] Test: Case-insensitive comparison on Windows/macOS
+
+- [ ] **Test: Force Overwrite Flag**
+  - [ ] Test: `--force-overwrite` bypasses input collision check
+  - [ ] Test: Flag does not bypass other validations
+  - [ ] Test: Flag documented in help text
+
+- [ ] **Test: Non-Existent Input Files**
+  - [ ] Test: Missing input file detected before processing
+  - [ ] Test: Multiple missing files all reported
+  - [ ] Test: Clear error message with file path
+
+- [ ] **Test: Output Directory Checks**
+  - [ ] Test: Non-existent output directory detected
+  - [ ] Test: Unwritable output directory detected
+  - [ ] Test: Output file permission check (read-only filesystem)
+
+- [ ] **Test: Existing Output File**
+  - [ ] Test: Warn when output file already exists
+  - [ ] Test: Provide option to overwrite or cancel
+  - [ ] Test: `--force-overwrite` skips prompt
+
+- [ ] **Test: Valid Configurations Pass**
+  - [ ] Test: `convert input.csv output.ndjson` (valid single file)
+  - [ ] Test: `convert file1.csv file2.csv merged.ndjson` (valid batch)
+  - [ ] Test: Output in different directory from inputs
+  - [ ] Test: Output with .json extension
+
+### 7.3 Implement File Validation Function ⏳
+
+**Goal:** Implement validation logic in main.py
+
+- [ ] **Create Validation Helper Functions**
+  - [ ] Implement `normalize_path(path_str) -> Path`: Convert to absolute, resolve symlinks
+  - [ ] Implement `validate_output_not_input(input_paths, output_path) -> Optional[str]`: Check collision
+  - [ ] Implement `validate_csv_extension_warning(output_path) -> Optional[str]`: Check .csv extension
+  - [ ] Implement `validate_input_files_exist(input_paths) -> List[str]`: Check all inputs exist
+  - [ ] Implement `validate_output_directory(output_path) -> Optional[str]`: Check output dir writable
+  - [ ] Add docstrings with examples for each function
+
+- [ ] **Integrate Validation into CLI**
+  - [ ] Add validation call at start of `convert()` function (before batch/single mode split)
+  - [ ] Collect all validation errors
+  - [ ] Display formatted error messages using click.echo(err=True)
+  - [ ] Exit with code 1 on validation failure
+  - [ ] Add `--force-overwrite` flag to Click options
+
+- [ ] **Add Confirmation Prompts**
+  - [ ] Implement `confirm_overwrite(path) -> bool` using click.confirm()
+  - [ ] Show warning for .csv output extension
+  - [ ] Show warning for existing output file
+  - [ ] Skip prompts if `--force-overwrite` or non-interactive mode
+
+- [ ] **Update Error Messages**
+  - [ ] Format error messages with clear sections (Error, Details, Suggestion)
+  - [ ] Use click.style() for colored output (red for errors, yellow for warnings)
+  - [ ] Include example command in suggestions
+  - [ ] Keep messages concise and actionable
+
+### 7.4 Add CLI Flag and Options ⏳
+
+**Goal:** Add configuration options for file validation
+
+- [ ] **Add --force-overwrite Flag**
+  - [ ] Add Click option: `@click.option('--force-overwrite', is_flag=True, help='...')`
+  - [ ] Pass flag through to validation functions
+  - [ ] Update help text with clear warning about data loss risk
+  - [ ] Document in README.md
+
+- [ ] **Update Help Text**
+  - [ ] Update `convert` command help with validation behavior
+  - [ ] Add examples of correct command format
+  - [ ] Document safety features in README
+  - [ ] Add troubleshooting section for common errors
+
+### 7.5 TUI Mode Integration ⏳
+
+**Goal:** Add file validation to TUI mode
+
+- [ ] **Update TUI Output Path Handling**
+  - [ ] Validate output path in ProcessingScreen before starting
+  - [ ] Show validation errors in modal dialog
+  - [ ] Prevent processing start if validation fails
+  - [ ] Add output path preview with validation status
+
+- [ ] **Add Visual Feedback**
+  - [ ] Show checkmark for valid output path
+  - [ ] Show warning icon for .csv extension
+  - [ ] Show error icon for path collision
+  - [ ] Update TUI help text with validation info
+
+### 7.6 Integration Testing & Documentation ⏳
+
+**Goal:** Verify all validation works end-to-end
+
+- [ ] **Run Integration Tests**
+  - [ ] Test CLI validation with real files
+  - [ ] Test batch mode validation
+  - [ ] Test TUI mode validation
+  - [ ] Test all error conditions manually
+  - [ ] Verify error messages are helpful
+
+- [ ] **Update Documentation**
+  - [ ] Update README.md with validation features
+  - [ ] Update CLAUDE.md with validation architecture
+  - [ ] Add troubleshooting guide for common validation errors
+  - [ ] Document --force-overwrite flag usage and warnings
+
+- [ ] **Performance Testing**
+  - [ ] Ensure validation doesn't add significant overhead
+  - [ ] Test with many input files (10+)
+  - [ ] Test with paths containing special characters
+  - [ ] Test with very long file paths
+
+### 7.7 Final Validation & Release ⏳
+
+**Goal:** Prepare v1.2 for release
+
+- [ ] **Run Full Test Suite**
+  - [ ] All existing tests pass (123/123 from v1.1)
+  - [ ] All new validation tests pass (+10 tests)
+  - [ ] Total: 133+ tests passing
+  - [ ] No regressions detected
+
+- [ ] **Manual Testing**
+  - [ ] Test with Schwab CSV files
+  - [ ] Try to reproduce original data loss scenario (should be prevented)
+  - [ ] Test on Windows, Linux, macOS (if available)
+  - [ ] Verify WSL path handling
+
+- [ ] **Update Version Numbers**
+  - [ ] Update README with v1.2 features
+  - [ ] Update PRD status to "Complete - v1.2"
+  - [ ] Update pyproject.toml version to 1.2
+  - [ ] Tag release as v1.2
+
+---
+
+## Phase 7 Completion Checklist ⏳
+
+- [ ] File validation implemented and tested
+- [ ] Input file protection working (prevents overwrites)
+- [ ] CSV extension warnings shown
+- [ ] --force-overwrite flag functional
+- [ ] All tests passing (133+ tests)
+- [ ] Documentation updated (README, CLAUDE.md, PRD.md)
+- [ ] **Version 1.2 Complete**
+
 ---
 
 ## Notes

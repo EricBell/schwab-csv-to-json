@@ -526,7 +526,97 @@ All flags are functional and tested with 123 tests passing.
 
 ---
 
-## 11. Appendix
+## 11. Phase 3 Requirements (Version 1.2)
+
+**Status:** 🔄 In Progress
+**Target Version:** 1.2
+**Start Date:** 2025-11-27
+
+This section documents requirements for improved error handling to prevent data loss.
+
+### 11.1 Input File Protection ⏳
+
+**Problem Statement:**
+
+During batch processing, users may accidentally omit the output file argument, causing the CLI to interpret the last input CSV file as the output path. This results in overwriting the input file with processed data, leading to data loss.
+
+**Example of Problematic Command:**
+```bash
+# User intended: convert file1.csv file2.csv file3.csv output.ndjson
+# User typed:   convert file1.csv file2.csv file3.csv
+# Result: file3.csv gets overwritten with output data
+```
+
+**Requirement:** Prevent input CSV files from being overwritten by output operations.
+
+**Acceptance Criteria:**
+- [ ] CLI validates that the output path is not in the list of input paths
+- [ ] CLI warns if output file has a `.csv` extension
+- [ ] CLI provides clear error message explaining the issue
+- [ ] CLI suggests the correct command format
+- [ ] Error occurs before any file processing begins (fail-fast)
+- [ ] Validation works for both single-file and batch modes
+- [ ] Validation handles both absolute and relative paths correctly
+- [ ] Optional `--force` flag to bypass validation if needed
+
+**Implementation:**
+
+**Location:** main.py convert command (around line 814-850)
+
+**Validation Logic:**
+1. **Output in Input Check**: Compare normalized absolute paths
+2. **Extension Warning**: Check if output has `.csv` extension
+3. **Path Collision Detection**: Handle symlinks, relative paths, case sensitivity
+
+**Error Messages:**
+```
+Error: Output file would overwrite input file
+  Output: /path/to/file3.csv
+  Input files: ['/path/to/file1.csv', '/path/to/file2.csv', '/path/to/file3.csv']
+
+Suggestion: Specify a different output file:
+  uv run python main.py convert file1.csv file2.csv file3.csv output.ndjson
+```
+
+**Configuration:**
+- Add `--force-overwrite` flag to bypass validation (for advanced users)
+- Include validation in both CLI and TUI modes
+
+---
+
+### 11.2 Additional Safety Features ⏳
+
+**Requirement:** Add comprehensive file operation safety checks.
+
+**Acceptance Criteria:**
+- [ ] Verify all input files exist before starting processing
+- [ ] Check that output directory exists and is writable
+- [ ] Warn if output file already exists (with option to overwrite)
+- [ ] Detect and prevent circular references (symlinks)
+- [ ] Validate file permissions before processing
+- [ ] Provide clear error messages for all failure modes
+
+---
+
+### 11.3 Version 1.2 Testing Requirements ⏳
+
+**Test Coverage:**
+- [ ] Test: Output path matches input path (should fail)
+- [ ] Test: Output has .csv extension (should warn)
+- [ ] Test: Output in different directory than inputs (should pass)
+- [ ] Test: --force-overwrite flag bypasses check
+- [ ] Test: Symlink detection works correctly
+- [ ] Test: Relative vs absolute path normalization
+- [ ] Test: Case-insensitive filesystem handling (Windows)
+- [ ] Test: Output file already exists prompt
+- [ ] Test: Non-existent input file detection
+- [ ] Test: Unwritable output directory detection
+
+**Minimum Test Count:** +10 new tests for v1.2
+
+---
+
+## 12. Appendix
 
 ### Example Input
 <!-- Paste a small sample of actual Schwab CSV -->
