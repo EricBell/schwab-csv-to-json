@@ -12,6 +12,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 
+__version__ = "1.1.0"
+
 # Column alias mapping - maps normalized header names to canonical field names
 COL_ALIASES = {
     # exec_time aliases
@@ -954,6 +956,7 @@ def validate_file_paths(
 
 
 @click.group()
+@click.version_option(version=__version__, prog_name="schwab-csv-to-json")
 def cli():
     """Schwab CSV to JSON converter with TUI and CLI modes."""
     pass
