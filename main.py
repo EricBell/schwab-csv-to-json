@@ -91,9 +91,14 @@ COL_ALIASES = {
 
 # Default section detection patterns
 DEFAULT_SECTION_PATTERNS = {
-    # Full header patterns (most specific first)
-    r'(?i)^,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type': 'Filled Orders',
+    # Full header patterns - MOST SPECIFIC FIRST
+    # Trade Activity patterns (14 columns, includes Price Improvement)
+    r'(?i)^,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type': 'Filled Orders',
     r'(?i)^Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status': 'Canceled Orders',
+
+    # Account Statement patterns (13 columns, no Price Improvement)
+    r'(?i)^,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Order Type': 'Account Trade History',
+    r'(?i)^Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status': 'Account Order History',
 
     # Standalone section names
     r'(?i)^Working Orders\s*$': 'Working Orders',
@@ -150,6 +155,37 @@ def normalize_key(s: Optional[str]) -> str:
     # Collapse multiple spaces to single space
     s = re.sub(r'\s+', ' ', s)
     return s.lower()
+
+
+# Section name normalization mapping
+SECTION_NAME_NORMALIZATION = {
+    'account trade history': 'Filled Orders',
+}
+
+
+def normalize_section_name(section: Optional[str]) -> Optional[str]:
+    """
+    Normalize section name for output consistency.
+
+    Maps account statement section names to trade activity equivalents
+    where semantically appropriate.
+
+    Args:
+        section: Raw section name from pattern detection
+
+    Returns:
+        Normalized section name for output
+    """
+    if section is None:
+        return None
+
+    # Check normalization mapping (case-insensitive)
+    normalized_key = section.lower().strip()
+    if normalized_key in SECTION_NAME_NORMALIZATION:
+        return SECTION_NAME_NORMALIZATION[normalized_key]
+
+    # Pass through unchanged
+    return section
 
 
 def map_header_to_index(header: List[str], col_aliases: Dict[str, str] = None) -> Dict[str, int]:
@@ -463,19 +499,22 @@ def build_order_record(
             'right': type_str,
         }
 
-    # Determine event type
-    if section == 'Filled Orders':
+    # Determine event type (use normalized section name)
+    normalized_section = normalize_section_name(section)
+    if normalized_section == 'Filled Orders':
         event_type = 'fill'
-    elif section == 'Canceled Orders':
+    elif normalized_section == 'Canceled Orders':
         event_type = 'cancel'
-    elif section == 'Working Orders':
+    elif normalized_section == 'Working Orders':
         event_type = 'working'
+    elif normalized_section == 'Account Order History':
+        event_type = 'mixed'  # New event type for mixed-status sections
     else:
         event_type = 'other'
 
     # Build unified record with ALL fields
     record = {
-        'section': section,  # Keep original section name
+        'section': normalize_section_name(section),
         'row_index': row_index,
         'raw': ','.join(cells),
         'issues': issues,
@@ -542,7 +581,7 @@ def build_amendment_record(section: str, cells: List[str], row_index: int) -> Di
             tif = c_str.upper()
 
     record = {
-        'section': section,  # Keep original section name
+        'section': normalize_section_name(section),
         'row_index': row_index,
         'event_type': 'amend',
         'amendment': {
@@ -627,7 +666,7 @@ def parse_file(
 
                 # Create section header record
                 section_header_record = {
-                    'section': section,  # Keep original section name
+                    'section': normalize_section_name(section),
                     'row_index': row_index,
                     'raw': ','.join(cells),
                     'issues': ['section_header'],
@@ -681,7 +720,7 @@ def parse_file(
 
                 # Create header record
                 header_record = {
-                    'section': section,  # Keep original section name
+                    'section': normalize_section_name(section),
                     'row_index': row_index,
                     'raw': ','.join(cells),
                     'issues': ['section_header'],

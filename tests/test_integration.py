@@ -419,3 +419,88 @@ class TestOutputFormat:
             # Check second canceled order (with ~ for price)
             rec2 = records[1]
             assert rec2['price'] is None  # ~ should be treated as null
+
+
+class TestAccountStatementIntegration:
+    """Integration tests for account statement CSV parsing."""
+
+    def test_parse_account_statement_file(self, tmp_path):
+        """Parse complete account statement file with both sections."""
+        csv_content = """Account Statement for 79967586
+
+Account Order History
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,12/2/25 10:25:43,STOCK,BUY,+300,TO OPEN,FOSL,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,3.50,STP,STD,
+,,12/2/25 09:35:41,STOCK,BUY,+200,TO OPEN,JSPR,,,STOCK,2.30,LMT,DAY,FILLED
+
+Account Trade History
+,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Order Type
+,12/2/25 09:42:26,STOCK,SELL,-200,TO CLOSE,JSPR,,,STOCK,2.17,2.17,STP
+,12/2/25 09:35:41,STOCK,BUY,+200,TO OPEN,JSPR,,,STOCK,2.2995,2.2995,LMT
+"""
+        test_file = tmp_path / "test_statement.csv"
+        test_file.write_text(csv_content)
+
+        from main import parse_file
+        records, sections_skipped = parse_file(str(test_file), skip_empty_sections=True)
+
+        # Verify section normalization
+        sections = {r['section'] for r in records if r.get('section')}
+        assert 'Account Order History' in sections
+        assert 'Filled Orders' in sections  # Account Trade History normalized
+        assert 'Account Trade History' not in sections
+
+        # Verify data correctness
+        trade_history_records = [
+            r for r in records
+            if r.get('section') == 'Filled Orders'
+            and r.get('exec_time') is not None
+            and 'section_header' not in r.get('issues', [])
+        ]
+        assert len(trade_history_records) == 2
+
+        jspr_buy = [r for r in trade_history_records if r['side'] == 'BUY'][0]
+        assert jspr_buy['symbol'] == 'JSPR'
+        assert jspr_buy['qty'] == 200
+        assert jspr_buy['price'] == 2.2995
+
+    def test_account_statement_missing_price_improvement(self, tmp_path):
+        """Account Trade History records should have null price_improvement."""
+        csv_content = """Account Trade History
+,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Order Type
+,12/2/25 09:35:41,STOCK,BUY,+200,TO OPEN,JSPR,,,STOCK,2.30,2.30,LMT
+"""
+        tmp_file = tmp_path / "trade_history.csv"
+        tmp_file.write_text(csv_content)
+
+        from main import parse_file
+        records, _ = parse_file(str(tmp_file))
+
+        data_records = [r for r in records if 'section_header' not in r.get('issues', [])]
+        assert len(data_records) == 1
+        assert data_records[0]['price_improvement'] is None
+        assert data_records[0]['section'] == 'Filled Orders'
+
+    def test_backward_compatibility_trade_activity_unchanged(self, tmp_path):
+        """Existing trade activity files should parse identically."""
+        csv_content = """Today's Trade Activity
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,10/24/25 09:51:38,STOCK,SELL,-75,TO CLOSE,NEUP,,,STOCK,8.30,8.30,-,MKT
+,,10/24/25 09:43:44,STOCK,BUY,+100,TO OPEN,NEUP,,,STOCK,7.2163,7.2163,2.37,MKT
+"""
+        test_file = tmp_path / "trade_activity.csv"
+        test_file.write_text(csv_content)
+
+        from main import parse_file
+        records, _ = parse_file(str(test_file))
+
+        sections = {r['section'] for r in records}
+        assert 'Filled Orders' in sections
+        assert 'Account Trade History' not in sections
+
+        # Verify price_improvement preserved
+        filled = [r for r in records if r.get('price_improvement') == 2.37]
+        assert len(filled) == 1

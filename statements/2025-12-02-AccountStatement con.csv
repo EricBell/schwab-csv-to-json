@@ -1,0 +1,77 @@
+﻿Account Statement for  (Contributory IRA) since 12/2/25 through 12/2/25
+
+Cash Balance
+DATE,TIME,TYPE,REF #,DESCRIPTION,Misc Fees,Commissions & Fees,AMOUNT,BALANCE
+12/2/25,01:00:00,BAL,,Cash balance at the start of business day 02.12 CST,,,,"14,553.84"
+12/2/25,09:35:41,TRD,="1004809428180",BOT +200 JSPR @2.2995,,,-459.90,"14,093.94"
+12/2/25,09:42:26,TRD,="1004809428574",SOLD -200 JSPR @2.17,-0.03,,434.00,"14,527.91"
+,,,,TOTAL,($0.03),,($25.90),"$14,527.91"
+
+Futures Statements
+Trade Date,Exec Date,Exec Time,Type,Ref #,Description,Misc Fees,Commissions & Fees,Amount,Balance
+12/2/25,12/2/25,01:00:00,BAL,--,Futures cash balance at the start of business day 02.12 CST,--,--,--,0.00
+
+Forex Statements
+,Date,Time,Type,Ref #,Description,Commissions & Fees,Amount,Amount(USD),Balance
+
+Crypto (trading provided by Schwab Digital Assets) Statements
+Trade Date,Exec Date,Exec Time,Type,Ref #,Description,Commissions & Fees,Amount,Balance
+
+ 
+"Total Cash $14,527.91"
+
+
+Account Order History
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,12/2/25 10:25:43,STOCK,BUY,+300,TO OPEN,FOSL,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,3.50,STP,STD,
+,,12/2/25 09:43:07,STOCK,BUY,+100,TO OPEN,PLRZ,,,STOCK,7.36,LMT,DAY,CANCELED
+,,12/2/25 09:39:11,STOCK,SELL,-200,TO CLOSE,JSPR,,,STOCK,~,MKT,DAY,FILLED
+,,,,,,,,,,,2.17,STP,STD,
+,,12/2/25 09:37:51,STOCK,SELL,-200,TO CLOSE,JSPR,,,STOCK,2.47,LMT,DAY,CANCELED
+,,12/2/25 09:35:55,STOCK,SELL,-200,TO CLOSE,JSPR,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,2.17,STP,STD,
+,,12/2/25 09:35:41,STOCK,BUY,+200,TO OPEN,JSPR,,,STOCK,2.30,LMT,DAY,FILLED
+
+Account Trade History
+,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Order Type
+,12/2/25 09:42:26,STOCK,SELL,-200,TO CLOSE,JSPR,,,STOCK,2.17,2.17,STP
+,12/2/25 09:35:41,STOCK,BUY,+200,TO OPEN,JSPR,,,STOCK,2.2995,2.2995,LMT
+
+Equities
+Symbol,Description,Qty,Trade Price,Mark,Mark Value
+MDT,MEDTRONIC PLC,+100,93.7199,102.03,"$10,203.00"
+,OVERALL TOTALS,,,,"$10,203.00"
+
+Profits and Losses
+Symbol,Description,P/L Open,P/L %,P/L Day,P/L YTD,P/L Diff,Margin Req,Close Value
+ARQ,ARQ INC,$0.00,0.00%,$0.00,$2.00,$0.00,$0.00,$0.00
+ARVN,ARVINAS INC,$0.00,0.00%,$0.00,$43.44,$0.00,$0.00,$0.00
+BITU,PROSHARES ULTRA BITCOIN ETF,$0.00,0.00%,$0.00,($5.49),$0.00,$0.00,$0.00
+BMNR,BITMINE IMMERSION TE,$0.00,0.00%,$0.00,$28.86,$0.00,$0.00,$0.00
+BTQ,BTQ TECHNOLOGIES COR,$0.00,0.00%,$0.00,($3.99),$0.00,$0.00,$0.00
+CLSK,CLEANSPARK INC,$0.00,0.00%,$0.00,$7.20,$0.00,$0.00,$0.00
+COGT,COGENT BIOSCIENCES I,$0.00,0.00%,$0.00,$19.70,$0.00,$0.00,$0.00
+CTM,CASTELLUM INC,$0.00,0.00%,$0.00,($2.75),$0.00,$0.00,$0.00
+GELS,GELTEQ LTD,$0.00,0.00%,$0.00,($15.00),$0.00,$0.00,$0.00
+GRAB,GRAB HLDGS LTD A,$0.00,0.00%,$0.00,($2.46),$0.00,$0.00,$0.00
+GRDX,GRIDAI TECHNOLOGIES,$0.00,0.00%,$0.00,($49.50),$0.00,$0.00,$0.00
+HMY,HARMONY GOLD MNG LTD ADR,$0.00,0.00%,$0.00,$2.00,$0.00,$0.00,$0.00
+IVDA,IVEDA SOLUTIONS INC Equity,$0.00,0.00%,$0.00,($33.85),$0.00,$0.00,$0.00
+JSPR,JASPER THERAPEUTICS,$0.00,0.00%,$0.00,($25.90),$0.00,$0.00,$0.00
+MDT,MEDTRONIC PLC,$831.01,+8.87%,($131.00),$831.01,$0.00,$0.00,"$10,203.00"
+NVD,GRANITESHARES NVDA DAILY ETF,$0.00,0.00%,$0.00,($2.94),$0.00,$0.00,$0.00
+QTTB,Q32 BIO INC,$0.00,0.00%,$0.00,$66.80,$0.00,$0.00,$0.00
+RPTX,REPARE THERAPEUTICS,$0.00,0.00%,$0.00,($1.37),$0.00,$0.00,$0.00
+XPEV,XPENG INC ADR ADR,$0.00,0.00%,$0.00,$42.75,$0.00,$0.00,$0.00
+ZIM,ZIM INTEGRATED SHIPP,$0.00,0.00%,$0.00,($36.29),$0.00,$0.00,$0.00
+,OVERALL TOTALS,$831.01,+8.87%,($131.00),$864.22,$0.00,$0.00,"$10,203.00"
+
+Account Summary
+Net Liquidating Value,"$24,730.91"
+Stock Buying Power,"$14,527.91"
+Option Buying Power,"$14,527.91"
+Equity Commissions & Fees YTD,$0.51
+Futures Commissions & Fees YTD,$0.00
+Crypto Trading Fees YTD,N/A
+Total Commissions & Fees YTD,$0.51

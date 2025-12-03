@@ -4,6 +4,7 @@ import re
 from main import (
     compile_section_patterns,
     normalize_key,
+    normalize_section_name,
     map_header_to_index,
     safe_get,
     detect_section_from_row,
@@ -486,3 +487,66 @@ class TestEdgeCases:
         header = ['Exec Time']
         result = map_header_to_index(header)
         assert 'exec_time' in result
+
+
+class TestAccountStatementSectionDetection:
+    """Test detection of account statement section headers."""
+
+    def test_detect_account_trade_history_header(self):
+        """Detect Account Trade History section from full header row."""
+        row = ',Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Order Type'
+        cells = row.split(',')
+        patterns = compile_section_patterns(DEFAULT_SECTION_PATTERNS)
+        result = detect_section_from_row(cells, patterns)
+        assert result == 'Account Trade History'
+
+    def test_detect_account_order_history_header(self):
+        """Detect Account Order History section from full header row."""
+        row = 'Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status'
+        cells = row.split(',')
+        patterns = compile_section_patterns(DEFAULT_SECTION_PATTERNS)
+        result = detect_section_from_row(cells, patterns)
+        assert result == 'Account Order History'
+
+    def test_account_statement_patterns_dont_conflict_with_trade_activity(self):
+        """Ensure new patterns don't match existing trade activity headers."""
+        # Test that Filled Orders pattern still matches (has Price Improvement column)
+        filled_row = ',,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type'
+        cells = filled_row.split(',')
+        patterns = compile_section_patterns(DEFAULT_SECTION_PATTERNS)
+        result = detect_section_from_row(cells, patterns)
+        assert result == 'Filled Orders'
+
+
+class TestSectionNameNormalization:
+    """Test section name normalization for output consistency."""
+
+    def test_normalize_section_name_account_trade_history(self):
+        """Account Trade History should normalize to Filled Orders."""
+        from main import normalize_section_name
+        result = normalize_section_name('Account Trade History')
+        assert result == 'Filled Orders'
+
+    def test_normalize_section_name_account_order_history(self):
+        """Account Order History should remain unchanged."""
+        from main import normalize_section_name
+        result = normalize_section_name('Account Order History')
+        assert result == 'Account Order History'
+
+    def test_normalize_section_name_passthrough(self):
+        """Existing section names should remain unchanged."""
+        from main import normalize_section_name
+        assert normalize_section_name('Filled Orders') == 'Filled Orders'
+        assert normalize_section_name('Canceled Orders') == 'Canceled Orders'
+        assert normalize_section_name('Working Orders') == 'Working Orders'
+
+    def test_normalize_section_name_case_insensitive(self):
+        """Normalization should be case-insensitive."""
+        from main import normalize_section_name
+        assert normalize_section_name('account trade history') == 'Filled Orders'
+        assert normalize_section_name('ACCOUNT TRADE HISTORY') == 'Filled Orders'
+
+    def test_normalize_section_name_none(self):
+        """None should pass through as None."""
+        from main import normalize_section_name
+        assert normalize_section_name(None) is None
