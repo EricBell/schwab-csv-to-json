@@ -100,6 +100,17 @@ DEFAULT_SECTION_PATTERNS = {
     r'(?i)^,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Order Type': 'Account Trade History',
     r'(?i)^Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status': 'Account Order History',
 
+    # Ignored sections (return None to skip these sections entirely)
+    r'(?i)^Equities\s*$': None,
+    r'(?i)^Cash Balance\s*$': None,
+    r'(?i)^Futures Statements\s*$': None,
+    r'(?i)^Forex Statements\s*$': None,
+    r'(?i)^Crypto.*Statements\s*$': None,
+    r'(?i)^Profits and Losses\s*$': None,
+    r'(?i)^Account Summary\s*$': None,
+    r'(?i)^Symbol,Description,Qty': None,  # Equities header
+    r'(?i)^Symbol,Description,P/L': None,  # P&L header
+
     # Standalone section names
     r'(?i)^Working Orders\s*$': 'Working Orders',
     r'(?i)^Filled Orders\s*$': 'Filled Orders',
@@ -652,6 +663,22 @@ def parse_file(
 
             # Check for section header
             detected_section = detect_section_from_row(cells, compiled_patterns)
+
+            # Handle ignored sections (where pattern maps to None)
+            if detected_section is None:
+                # Check if this row matches an ignore pattern
+                row_str = ','.join(['' if c is None else str(c) for c in cells])
+                for pattern, section_name in compiled_patterns:
+                    if section_name is None and pattern.search(row_str):
+                        # This is an ignored section - clear current section
+                        if verbose:
+                            click.echo(f"Ignoring section at row {row_index}: {cells[0] if cells else ''}", err=True)
+                        section = None
+                        in_data = False
+                        current_header_map = None
+                        buffered_header_map = None
+                        break
+
             if detected_section:
                 # If we had buffered headers, they belong to an empty section
                 if skip_empty_sections and buffered_section_header is not None:
@@ -706,6 +733,10 @@ def parse_file(
                         # Emit immediately
                         results.append(section_header_record)
 
+                continue
+
+            # Skip rows if we're in an ignored section or no section
+            if section is None:
                 continue
 
             # Skip Rolling Strategies if not included

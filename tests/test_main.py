@@ -455,7 +455,9 @@ class TestDefaultSectionPatterns:
     def test_filled_orders_pattern_exists(self):
         patterns_str = '\n'.join(DEFAULT_SECTION_PATTERNS.keys())
         assert 'exec' in patterns_str.lower()
-        assert 'filled' in '\n'.join(DEFAULT_SECTION_PATTERNS.values()).lower()
+        # Filter out None values (ignored sections) before joining
+        section_names = [v for v in DEFAULT_SECTION_PATTERNS.values() if v is not None]
+        assert 'filled' in '\n'.join(section_names).lower()
 
     def test_all_patterns_are_valid_regex(self):
         for pattern in DEFAULT_SECTION_PATTERNS.keys():
