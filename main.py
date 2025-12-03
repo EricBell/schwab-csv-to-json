@@ -510,16 +510,24 @@ def build_order_record(
             'right': type_str,
         }
 
-    # Determine event type (use normalized section name)
+    # Determine event type
+    # For Account Order History section, use status field to determine event_type
     normalized_section = normalize_section_name(section)
-    if normalized_section == 'Filled Orders':
+    if normalized_section == 'Account Order History' and status:
+        # Map status to event_type for mixed-status sections
+        if status == 'FILLED':
+            event_type = 'fill'
+        elif status in ('CANCELED', 'REJECTED'):
+            event_type = 'cancel'
+        else:
+            event_type = 'other'
+    # For other sections, use normalized section name
+    elif normalized_section == 'Filled Orders':
         event_type = 'fill'
     elif normalized_section == 'Canceled Orders':
         event_type = 'cancel'
     elif normalized_section == 'Working Orders':
         event_type = 'working'
-    elif normalized_section == 'Account Order History':
-        event_type = 'mixed'  # New event type for mixed-status sections
     else:
         event_type = 'other'
 

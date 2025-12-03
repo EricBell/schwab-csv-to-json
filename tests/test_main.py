@@ -552,3 +552,90 @@ class TestSectionNameNormalization:
         """None should pass through as None."""
         from main import normalize_section_name
         assert normalize_section_name(None) is None
+
+
+class TestStatusToEventTypeMapping:
+    """Test that status field is properly mapped to event_type."""
+
+    def test_status_filled_maps_to_fill(self):
+        """FILLED status should map to 'fill' event_type."""
+        from main import build_order_record
+
+        # Account Order History section with FILLED status
+        section = 'Account Order History'
+        header_map = {
+            'side': 2, 'qty': 3, 'symbol': 4, 'type': 5, 'status': 6
+        }
+        cells = ['', '', 'BUY', '100', 'AAPL', 'STOCK', 'FILLED']
+
+        result = build_order_record(section, header_map, cells, 1, qty_unsigned=False)
+
+        assert result is not None
+        assert result['status'] == 'FILLED'
+        assert result['event_type'] == 'fill'
+
+    def test_status_canceled_maps_to_cancel(self):
+        """CANCELED status should map to 'cancel' event_type."""
+        from main import build_order_record
+
+        # Account Order History section with CANCELED status
+        section = 'Account Order History'
+        header_map = {
+            'side': 2, 'qty': 3, 'symbol': 4, 'type': 5, 'status': 6
+        }
+        cells = ['', '', 'BUY', '100', 'AAPL', 'STOCK', 'CANCELED']
+
+        result = build_order_record(section, header_map, cells, 1, qty_unsigned=False)
+
+        assert result is not None
+        assert result['status'] == 'CANCELED'
+        assert result['event_type'] == 'cancel'
+
+    def test_status_rejected_maps_to_cancel(self):
+        """REJECTED status should map to 'cancel' event_type."""
+        from main import build_order_record
+
+        # Account Order History section with REJECTED status
+        section = 'Account Order History'
+        header_map = {
+            'side': 2, 'qty': 3, 'symbol': 4, 'type': 5, 'status': 6
+        }
+        cells = ['', '', 'BUY', '100', 'AAPL', 'STOCK', 'REJECTED']
+
+        result = build_order_record(section, header_map, cells, 1, qty_unsigned=False)
+
+        assert result is not None
+        assert result['status'] == 'REJECTED'
+        assert result['event_type'] == 'cancel'
+
+    def test_filled_orders_section_still_uses_section_name(self):
+        """Filled Orders section should still use section-based event_type."""
+        from main import build_order_record
+
+        # Regular Filled Orders section (no status field)
+        section = 'Filled Orders'
+        header_map = {
+            'side': 2, 'qty': 3, 'symbol': 4, 'type': 5
+        }
+        cells = ['', '', 'BUY', '100', 'AAPL', 'STOCK']
+
+        result = build_order_record(section, header_map, cells, 1, qty_unsigned=False)
+
+        assert result is not None
+        assert result['event_type'] == 'fill'
+
+    def test_canceled_orders_section_still_uses_section_name(self):
+        """Canceled Orders section should still use section-based event_type."""
+        from main import build_order_record
+
+        # Regular Canceled Orders section (may have status field but section determines type)
+        section = 'Canceled Orders'
+        header_map = {
+            'side': 2, 'qty': 3, 'symbol': 4, 'type': 5
+        }
+        cells = ['', '', 'BUY', '100', 'AAPL', 'STOCK']
+
+        result = build_order_record(section, header_map, cells, 1, qty_unsigned=False)
+
+        assert result is not None
+        assert result['event_type'] == 'cancel'
