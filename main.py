@@ -517,7 +517,9 @@ def build_order_record(
         # Map status to event_type for mixed-status sections
         if status == 'FILLED':
             event_type = 'fill'
-        elif status in ('CANCELED', 'REJECTED'):
+        elif status == 'CANCELED' or status.startswith('REJECTED'):
+            # Handle both simple "REJECTED" and detailed rejection messages
+            # e.g., "REJECTED: THIS ORDER MAY RESULT IN AN OVERSOLD/OVERBOUGHT POSITION..."
             event_type = 'cancel'
         else:
             event_type = 'other'

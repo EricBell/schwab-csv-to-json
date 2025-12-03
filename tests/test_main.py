@@ -608,6 +608,24 @@ class TestStatusToEventTypeMapping:
         assert result['status'] == 'REJECTED'
         assert result['event_type'] == 'cancel'
 
+    def test_status_rejected_with_message_maps_to_cancel(self):
+        """REJECTED status with detailed message should map to 'cancel' event_type."""
+        from main import build_order_record
+
+        # Account Order History section with detailed REJECTED status message
+        section = 'Account Order History'
+        header_map = {
+            'side': 2, 'qty': 3, 'symbol': 4, 'type': 5, 'status': 6
+        }
+        cells = ['', '', 'BUY', '100', 'AAPL', 'STOCK',
+                 'REJECTED: THIS ORDER MAY RESULT IN AN OVERSOLD/OVERBOUGHT POSITION...']
+
+        result = build_order_record(section, header_map, cells, 1, qty_unsigned=False)
+
+        assert result is not None
+        assert result['status'].startswith('REJECTED:')
+        assert result['event_type'] == 'cancel'
+
     def test_filled_orders_section_still_uses_section_name(self):
         """Filled Orders section should still use section-based event_type."""
         from main import build_order_record
