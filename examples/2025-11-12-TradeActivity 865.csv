@@ -1,0 +1,37 @@
+﻿Today's Trade Activity for acct (Contributory IRA) on 11/12/25 18:45:35
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,11/12/25 10:23:31,STOCK,SELL,-200,TO CLOSE,ARQ,,,STOCK,3.92,3.92,2.00,MKT
+,,11/12/25 10:23:22,STOCK,SELL,-80,TO CLOSE,HMY,,,STOCK,18.815,18.815,.40,MKT
+,,11/12/25 10:16:00,STOCK,SELL,-15,TO CLOSE,HMY,,,STOCK,18.89,18.89,-,LMT
+,,11/12/25 10:16:00,STOCK,SELL,-5,TO CLOSE,HMY,,,STOCK,18.89,18.89,-,LMT
+,,11/12/25 10:11:32,STOCK,BUY,+198,TO OPEN,ARQ,,,STOCK,3.91,3.91,-,LMT
+,,11/12/25 10:11:32,STOCK,BUY,+2,TO OPEN,ARQ,,,STOCK,3.91,3.91,-,LMT
+,,11/12/25 10:09:44,STOCK,BUY,+100,TO OPEN,HMY,,,STOCK,18.81,18.81,-,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,11/12/25 10:23:21,STOCK,SELL,-80,TO CLOSE,HMY,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004665540753,,,,,,,,18.69,STP,STD,
+,,11/12/25 10:20:20,STOCK,SELL,-80,TO CLOSE,HMY,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,18.81,STP,STD,
+,,11/12/25 10:18:33,STOCK,SELL,-20,TO CLOSE,HMY,,,STOCK,~,MKT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,,,,,,,,,,18.80,STP,STD,
+,,11/12/25 10:19:45,STOCK,SELL,-20,TO CLOSE,HMY,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,18.81,STP,STD,
+,,11/12/25 10:19:45,STOCK,SELL,-20,TO CLOSE,HMY,,,STOCK,19.02,LMT,DAY,CANCELED
+,,,RE #1004665540566,,,,,,,,,,,
+,,11/12/25 10:18:29,STOCK,SELL,-20,TO CLOSE,HMY,,,STOCK,19.01,LMT,DAY,CANCELED
+,,11/12/25 10:19:45,STOCK,SELL,-40,TO CLOSE,HMY,,,STOCK,19.02,LMT,DAY,CANCELED
+,,11/12/25 10:25:42,STOCK,SELL,-200,TO CLOSE,ARQ,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,3.78,STP,STD,
+,,11/12/25 10:15:29,STOCK,SELL,-20,TO CLOSE,HMY,,,STOCK,18.90,LMT,DAY,CANCELED
+,,11/12/25 10:11:33,STOCK,SELL,-100,TO CLOSE,HMY,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,18.67,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

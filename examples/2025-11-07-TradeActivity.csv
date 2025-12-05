@@ -1,0 +1,26 @@
+﻿Today's Trade Activity for acct (Individual) on 11/7/25 19:27:30
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,11/7/25 09:52:10,SINGLE,SELL,-1,TO CLOSE,MNST,21 NOV 25,75,CALL,.40,.40,-,STP
+,,11/7/25 09:47:14,SINGLE,SELL,-1,TO CLOSE,MNST,21 NOV 25,75,CALL,.45,.45,-,LMT
+,,11/7/25 09:46:46,SINGLE,SELL,-1,TO CLOSE,MNST,21 NOV 25,75,CALL,.39,.39,-,LMT
+,,11/7/25 09:43:57,SINGLE,BUY,+1,TO OPEN,MNST,21 NOV 25,75,CALL,.29,.29,3.00,MKT
+,,11/7/25 09:43:57,SINGLE,BUY,+1,TO OPEN,MNST,21 NOV 25,75,CALL,.29,.29,3.00,MKT
+,,11/7/25 09:43:57,SINGLE,BUY,+1,TO OPEN,MNST,21 NOV 25,75,CALL,.29,.29,3.00,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,11/7/25 09:49:35,SINGLE,SELL,-1,TO CLOSE,MNST,21 NOV 25,75,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.35,STP,STD,
+,,11/7/25 09:49:07,SINGLE,SELL,-1,TO CLOSE,MNST,21 NOV 25,75,CALL,.58,LMT,DAY,CANCELED
+,,,RE #1004627163094,,,,,,,,,,,
+,,11/7/25 09:48:37,SINGLE,SELL,-1,TO CLOSE,MNST,21 NOV 25,75,CALL,.51,LMT,DAY,CANCELED
+,,11/7/25 09:45:44,SINGLE,SELL,-3,TO CLOSE,MNST,21 NOV 25,75,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.16,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

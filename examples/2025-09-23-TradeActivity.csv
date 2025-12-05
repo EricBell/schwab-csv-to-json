@@ -1,0 +1,31 @@
+﻿Today's Trade Activity for acct (Individual) on 9/23/25 23:29:00
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,9/23/25 15:32:19,STOCK,SELL,-100,TO CLOSE,SAVA,,,STOCK,3.5611,3.5611,.11,MKT
+,,9/23/25 15:30:53,STOCK,BUY,+100,TO OPEN,SAVA,,,STOCK,3.53,3.53,-,STP
+,,9/23/25 15:22:02,STOCK,SELL,-100,TO CLOSE,SAVA,,,STOCK,3.4611,3.4611,.11,MKT
+,,9/23/25 15:17:12,STOCK,BUY,+100,TO OPEN,SAVA,,,STOCK,3.585,3.585,.50,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,9/23/25 15:32:18,STOCK,SELL,-100,TO CLOSE,SAVA,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,3.48,STP,STD,
+,,9/23/25 15:29:08,STOCK,BUY,+100,TO OPEN,SAVA,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,3.53,STP,STD,
+,,9/23/25 15:44:42,SINGLE,BUY,+2,TO OPEN,SPY,23 SEP 25,661,PUT,~,MKT,DAY,CANCELED
+,,,RE #1004225873956,,,,,,,,.27,STP,STD,
+,,9/23/25 15:25:00,SINGLE,BUY,+2,TO OPEN,SPY,23 SEP 25,661,PUT,~,MKT,DAY,CANCELED
+,,,RE #1004225872406,,,,,,,,.26,STP,STD,
+,,9/23/25 15:22:01,STOCK,SELL,-100,TO CLOSE,SAVA,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,3.45,STP,STD,
+,,9/23/25 15:24:57,SINGLE,BUY,+2,TO OPEN,SPY,23 SEP 25,661,PUT,~,MKT,DAY,CANCELED
+,,,RE #1004225872366,,,,,,,,.30,STP,STD,
+,,9/23/25 14:59:12,SINGLE,BUY,+2,TO OPEN,SPY,23 SEP 25,661,PUT,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.28,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

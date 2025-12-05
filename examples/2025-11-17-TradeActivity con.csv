@@ -1,0 +1,64 @@
+﻿Today's Trade Activity for acct (Contributory IRA) on 11/17/25 15:56:15
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,11/17/25 14:57:49,STOCK,SELL,-280,TO CLOSE,RPTX,,,STOCK,2.1151,2.11511,1.428,MKT
+,,11/17/25 09:44:23,STOCK,BUY,+64,TO OPEN,RPTX,,,STOCK,2.12,2.12,-,LMT
+,,11/17/25 09:44:21,STOCK,BUY,+100,TO OPEN,RPTX,,,STOCK,2.12,2.12,-,LMT
+,,11/17/25 09:43:58,STOCK,BUY,+36,TO OPEN,RPTX,,,STOCK,2.12,2.12,-,LMT
+,,11/17/25 09:37:56,STOCK,BUY,+80,TO OPEN,RPTX,,,STOCK,2.12,2.12,-,STP
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,11/17/25 14:57:43,STOCK,SELL,-40,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004700426656,,,,,,,,2.01,STP,STD,
+,,,OCO #1004700426654,,,,,,,,,,,
+,,11/17/25 14:57:43,STOCK,SELL,-40,TO CLOSE,RPTX,,,STOCK,2.37,LMT,DAY,CANCELED
+,,,OCO #1004700426654,,,,,,,,,,,
+,,11/17/25 09:57:13,STOCK,SELL,-40,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,OCO #1004700426654,,,,,,,,2.03,STP,STD,
+,,11/17/25 09:56:49,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,2.37,LMT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,,OCO #1004700426598,,,,,,,,,,,
+,,11/17/25 09:56:49,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,,OCO #1004700426598,,,,,,,,2.04,STP,STD,
+,,11/17/25 09:56:19,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,2.37,LMT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,,OCO #1004700426519,,,,,,,,,,,
+,,11/17/25 09:56:19,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,,OCO #1004700426519,,,,,,,,2.05,STP,STD,
+,,11/17/25 14:57:43,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004700426450,,,,,,,,2.01,STP,STD,
+,,,OCO #1004700426448,,,,,,,,,,,
+,,11/17/25 14:57:44,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,2.43,LMT,DAY,CANCELED
+,,,OCO #1004700426448,,,,,,,,,,,
+,,11/17/25 09:55:58,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,OCO #1004700426448,,,,,,,,2.03,STP,STD,
+,,11/17/25 14:57:44,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004700426363,,,,,,,,2.01,STP,STD,
+,,,OCO #1004700426361,,,,,,,,,,,
+,,11/17/25 14:57:44,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,2.29,LMT,DAY,CANCELED
+,,,OCO #1004700426361,,,,,,,,,,,
+,,11/17/25 09:55:30,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,OCO #1004700426361,,,,,,,,2.06,STP,STD,
+,,11/17/25 14:57:44,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004700426321,,,,,,,,2.01,STP,STD,
+,,,OCO #1004700426319,,,,,,,,,,,
+,,11/17/25 14:57:44,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,2.26,LMT,DAY,CANCELED
+,,,OCO #1004700426319,,,,,,,,,,,
+,,11/17/25 09:55:17,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,OCO #1004700426319,,,,,,,,2.06,STP,STD,
+,,11/17/25 09:55:09,STOCK,SELL,-200,TO CLOSE,RPTX,,,STOCK,2.26,LMT,DAY,CANCELED
+,,,OCO #1004700426279,,,,,,,,,,,
+,,11/17/25 09:55:09,STOCK,SELL,-200,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,OCO #1004700426279,,,,,,,,2.07,STP,STD,
+,,11/17/25 09:54:48,STOCK,SELL,-200,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004699760860,,,,,,,,2.01,STP,STD,
+,,11/17/25 09:44:43,STOCK,SELL,-200,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,2.02,STP,STD,
+,,11/17/25 09:54:48,STOCK,SELL,-80,TO CLOSE,RPTX,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,2.01,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

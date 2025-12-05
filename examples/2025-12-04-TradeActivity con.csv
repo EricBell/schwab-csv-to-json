@@ -1,0 +1,23 @@
+﻿Today's Trade Activity for acct (Contributory IRA) on 12/4/25 15:52:09
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,12/4/25 09:49:44,STOCK,SELL,-50,TO CLOSE,PLRZ,,,STOCK,17.89,17.89,-,LMT
+,,12/4/25 09:48:10,STOCK,SELL,-50,TO CLOSE,PLRZ,,,STOCK,17.43,17.43,-,LMT
+,,12/4/25 09:46:55,STOCK,BUY,+61,TO OPEN,PLRZ,,,STOCK,16.15,16.15,-,LMT
+,,12/4/25 09:46:55,STOCK,BUY,+39,TO OPEN,PLRZ,,,STOCK,16.15,16.15,-,LMT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,12/4/25 09:47:48,STOCK,SELL,-50,TO CLOSE,PLRZ,,,STOCK,~,MKT,DAY,REJECTED: The stop price must be above the current ask for buy stop orders and below the bid for sell stop orders.
+,,,,,,,,,,,17.53,STP,STD,
+,,12/4/25 09:47:39,STOCK,SELL,-100,TO CLOSE,PLRZ,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,15.39,STP,STD,
+,,12/4/25 09:51:53,STOCK,BUY,+300,TO OPEN,KALA,,,STOCK,1.29,LMT,DAY,CANCELED
+,,12/4/25 09:38:34,STOCK,BUY,+300,TO OPEN,KALA,,,STOCK,1.35,LMT,DAY,CANCELED
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

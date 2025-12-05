@@ -1,0 +1,21 @@
+﻿Today's Trade Activity for acct (Individual) on 12/4/25 15:51:55
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,12/4/25 15:50:24,SINGLE,SELL,-1,TO CLOSE,SPY,4 DEC 25,683,CALL,.70,.70,-,LMT
+,,12/4/25 15:28:44,SINGLE,BUY,+1,TO OPEN,SPY,4 DEC 25,683,CALL,.45,.45,-,LMT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,12/4/25 15:50:20,SINGLE,SELL,-1,TO CLOSE,SPY,4 DEC 25,683,CALL,.73,LMT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,12/4/25 15:50:13,SINGLE,SELL,-1,TO CLOSE,SPY,4 DEC 25,683,CALL,~,MKT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,,,,,,,,,,.65,STP,STD,
+,,12/4/25 15:50:22,SINGLE,SELL,-1,TO CLOSE,SPY,4 DEC 25,683,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.15,STP,STD,
+,,12/4/25 15:12:51,SINGLE,BUY,+3,TO OPEN,SPY,4 DEC 25,683,CALL,.36,LMT,DAY,CANCELED
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

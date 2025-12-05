@@ -1,0 +1,25 @@
+﻿Today's Trade Activity for acct (Contributory IRA) on 11/13/25 18:56:41
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,11/13/25 10:31:59,STOCK,SELL,-500,TO CLOSE,CTM,,,STOCK,1.1644,1.1644,2.20,MKT
+,,11/13/25 10:08:53,STOCK,BUY,+500,TO OPEN,CTM,,,STOCK,1.1699,1.1699,.05,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,11/13/25 10:31:57,STOCK,SELL,-500,TO CLOSE,CTM,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,1.09,STP,STD,
+,,11/13/25 10:24:12,STOCK,SELL,-250,TO CLOSE,CTM,,,STOCK,1.29,LMT,DAY,CANCELED
+,,11/13/25 10:24:12,STOCK,SELL,-125,TO CLOSE,CTM,,,STOCK,1.22,LMT,DAY,CANCELED
+,,11/13/25 10:13:11,STOCK,SELL,-500,TO CLOSE,CTM,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,1.10,STP,STD,
+,,11/13/25 10:12:13,STOCK,SELL,-500,TO CLOSE,CTM,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,1.11,STP,STD,
+,,11/13/25 09:36:25,STOCK,BUY,+20,TO OPEN,FLY,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,24.23,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

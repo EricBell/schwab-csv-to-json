@@ -1,0 +1,28 @@
+﻿Today's Trade Activity for acct (Individual) on 11/12/25 18:44:22
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,11/12/25 15:21:54,SINGLE,BUY,+2,TO OPEN,SPY,12 NOV 25,682,PUT,.18,.18,-,LMT
+,,11/12/25 10:02:58,STOCK,SELL,-40,TO CLOSE,HMY,,,STOCK,18.69,18.69,-,STP
+,,11/12/25 09:46:33,STOCK,BUY,+40,TO OPEN,HMY,,,STOCK,18.8913,18.89125,.348,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,11/12/25 16:11:37,SINGLE,SELL,-2,TO CLOSE,SPY,12 NOV 25,682,PUT,~,MKT,DAY,CANCELED
+,,11/12/25 16:02:58,SINGLE,SELL,-2,TO CLOSE,SPY,12 NOV 25,682,PUT,.04,LMT,DAY,CANCELED
+,,11/12/25 10:01:12,STOCK,BUY,+30,TO OPEN,HMY,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,18.92,STP,STD,
+,,11/12/25 09:52:43,STOCK,SELL,-40,TO CLOSE,HMY,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004663837269,,,,,,,,18.72,STP,STD,
+,,11/12/25 09:52:40,STOCK,SELL,-40,TO CLOSE,HMY,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004663837176,,,,,,,,18.59,STP,STD,
+,,11/12/25 09:48:33,STOCK,SELL,-40,TO CLOSE,HMY,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1004663837110,,,,,,,,18.27,STP,STD,
+,,11/12/25 09:47:41,STOCK,SELL,-40,TO CLOSE,HMY,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,18.67,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

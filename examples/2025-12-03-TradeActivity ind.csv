@@ -1,0 +1,21 @@
+﻿Today's Trade Activity for acct (Individual) on 12/3/25 22:24:06
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,12/3/25 15:59:29,SINGLE,SELL,-1,TO CLOSE,SPY,3 DEC 25,684,PUT,.25,.25,1.00,MKT
+,,12/3/25 15:55:05,SINGLE,SELL,-1,TO CLOSE,SPY,3 DEC 25,684,PUT,.43,.43,4.00,MKT
+,,12/3/25 15:54:36,SINGLE,BUY,+2,TO OPEN,SPY,3 DEC 25,684,PUT,.29,.29,-,STP
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,12/3/25 15:59:28,SINGLE,SELL,-1,TO CLOSE,SPY,3 DEC 25,684,PUT,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.19,STP,STD,
+,,12/3/25 15:48:24,SINGLE,BUY,+1,TO OPEN,SPY,3 DEC 25,684,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,1.02,STP,STD,
+,,12/3/25 09:30:53,SINGLE,BUY,+1,TO OPEN,SPY,2 DEC 25,682,CALL,.01,LMT,DAY,REJECTED: This option contract is no longer valid. Please check the expiration date.
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status
