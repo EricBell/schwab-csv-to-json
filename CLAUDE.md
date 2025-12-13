@@ -8,7 +8,7 @@ This is a Python CLI tool with interactive TUI that converts Schwab CSV trade ac
 
 ### Modes of Operation
 
-1. **TUI Mode** (`main.py tui`): Interactive terminal UI with file browser, progress tracking, error review, and summary screens
+1. **TUI Mode** (`main.py tui`): Interactive terminal UI with enhanced file browser (full filesystem navigation), progress tracking, error review, and summary screens
 2. **CLI Batch Mode** (`main.py convert file1.csv file2.csv... output.ndjson`): Process multiple files into merged output
 3. **CLI Single Mode** (`main.py convert input.csv output.ndjson`): Traditional single-file conversion
 
@@ -86,10 +86,14 @@ Each record in batch output includes:
 The `tui.py` module implements a Textual-based terminal UI with 4 screens:
 
 1. **FileSelectionScreen**: Split-view with directory browser (left) and selected files list (right)
+   - **Enhanced Directory Navigation**: Navigate up and down the filesystem hierarchy
+     - Breadcrumb path display showing current directory
+     - Parent directory navigation via BACKSPACE/↑ keys or collapsing root node
+     - Full filesystem exploration (not limited to starting directory)
    - Visual selection indicators with checkboxes (☑)
    - Real-time selection counter
    - Clear multi-select instructions
-   - Keyboard shortcuts: ENTER to toggle, 'c' to clear all, 's' to start
+   - Keyboard shortcuts: ENTER to toggle, 'c' to clear all, 's' to start, BACKSPACE/↑ for parent dir
 2. **ProcessingScreen**: Progress bars showing real-time processing status
 3. **SummaryScreen**: Statistics display with processing time, record counts, validation issues
 4. **ErrorReviewScreen**: DataTable showing detailed validation errors

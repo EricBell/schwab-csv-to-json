@@ -26,6 +26,7 @@ from textual.widgets import (
     ProgressBar,
     ListView,
     ListItem,
+    Tree,
 )
 from textual.containers import Container, Vertical, Horizontal, ScrollableContainer
 from textual.binding import Binding
@@ -34,6 +35,115 @@ from rich.text import Text
 from rich.table import Table as RichTable
 
 from batch import process_multiple_files, BatchOptions, FileProgress, BatchResult
+
+
+class NavigableDirectoryTree(DirectoryTree):
+    """Enhanced DirectoryTree with parent directory navigation capabilities."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.path_change_callback = None
+
+    def set_path_change_callback(self, callback):
+        """Set a callback to be called when the path changes."""
+        self.path_change_callback = callback
+
+    def _notify_path_change(self):
+        """Notify that the path has changed."""
+        if self.path_change_callback:
+            self.path_change_callback()
+
+    async def on_tree_node_collapsed(self, event: Tree.NodeCollapsed) -> None:
+        """Navigate to parent directory when root node is collapsed."""
+        event.stop()
+
+        # Only handle root node collapse for parent navigation
+        if not event.node.is_root:
+            return
+
+        # Get current path and its parent
+        current_path = Path(self.path).resolve()
+        parent_path = current_path.parent
+
+        # Don't navigate above the filesystem root
+        if parent_path != current_path and parent_path.exists() and parent_path.is_dir():
+            self.path = str(parent_path)
+            await self.reload()
+            self._notify_path_change()
+
+    def navigate_to_parent(self) -> bool:
+        """
+        Navigate to the parent directory.
+
+        Returns:
+            True if navigation was successful, False otherwise
+        """
+        current_path = Path(self.path).resolve()
+        parent_path = current_path.parent
+
+        # Check if we can navigate to parent
+        if parent_path != current_path and parent_path.exists() and parent_path.is_dir():
+            self.path = str(parent_path)
+            self.reload()
+            self._notify_path_change()
+            return True
+        return False
+
+    def navigate_to_directory(self, directory_path: str) -> bool:
+        """
+        Navigate to a specific directory.
+
+        Args:
+            directory_path: Path to navigate to
+
+        Returns:
+            True if navigation was successful, False otherwise
+        """
+        try:
+            path = Path(directory_path).resolve()
+            if path.exists() and path.is_dir():
+                self.path = str(path)
+                self.reload()
+                self._notify_path_change()
+                return True
+        except (OSError, ValueError):
+            pass
+        return False
+
+    def get_current_path(self) -> str:
+        """Get the current directory path as a string."""
+        return str(Path(self.path).resolve())
+
+
+class PathBreadcrumb(Static):
+    """Widget displaying current directory path with navigation breadcrumbs."""
+
+    def __init__(self, initial_path: str = ".", **kwargs):
+        super().__init__(**kwargs)
+        self.current_path = Path(initial_path).resolve()
+        self.update_breadcrumb()
+
+    def update_path(self, new_path: str) -> None:
+        """Update the displayed path."""
+        self.current_path = Path(new_path).resolve()
+        self.update_breadcrumb()
+
+    def update_breadcrumb(self) -> None:
+        """Update the breadcrumb display."""
+        path_str = str(self.current_path)
+
+        # Truncate very long paths for display
+        max_length = 80
+        if len(path_str) > max_length:
+            # Show beginning and end of path
+            path_str = f"{path_str[:30]}...{path_str[-45:]}"
+
+        breadcrumb_text = f"📍 Current Path: {path_str}"
+        self.update(breadcrumb_text)
+
+    def get_path_parts(self) -> List[Path]:
+        """Get individual path components for potential future navigation."""
+        return list(self.current_path.parents)[::-1] + [self.current_path]
 
 
 def normalize_starting_dir(starting_dir: Optional[str]) -> str:
@@ -113,6 +223,8 @@ class FileSelectionScreen(Screen):
         Binding("s", "start_processing", "Start Processing"),
         Binding("c", "clear_selection", "Clear All"),
         Binding("o", "set_output", "Set Output"),
+        Binding("backspace", "navigate_parent", "Parent Dir"),
+        Binding("up", "navigate_parent", "Parent Dir"),
     ]
 
     def __init__(self, app_state: AppState, starting_dir: str = "."):
@@ -125,11 +237,12 @@ class FileSelectionScreen(Screen):
         yield Header()
         yield Container(
             Static("Select CSV files to process:", id="title"),
-            Static("🎯 Multi-Select Mode: ENTER to toggle selection, 's' to start, 'c' to clear all", id="help"),
+            Static("🎯 Multi-Select Mode: ENTER to toggle selection, 's' to start, 'c' to clear all, BACKSPACE/↑ for parent dir", id="help"),
+            PathBreadcrumb(self.starting_dir, id="path_breadcrumb"),
             Horizontal(
                 Container(
                     Static("📁 Browse Files", id="tree_title"),
-                    DirectoryTree(self.starting_dir, id="file_tree"),
+                    NavigableDirectoryTree(self.starting_dir, id="file_tree"),
                     id="tree_container",
                 ),
                 Container(
@@ -151,9 +264,10 @@ class FileSelectionScreen(Screen):
 
     def on_mount(self) -> None:
         """Handle screen mount."""
-        tree = self.query_one(DirectoryTree)
+        tree = self.query_one(NavigableDirectoryTree)
         tree.show_root = False
         tree.guide_depth = 3
+        tree.set_path_change_callback(self.update_breadcrumb_path)
 
     def on_directory_tree_file_selected(
         self, event: DirectoryTree.FileSelected
@@ -172,6 +286,13 @@ class FileSelectionScreen(Screen):
 
         # Update UI
         self.update_selection_display()
+
+    def on_directory_tree_directory_selected(
+        self, event: DirectoryTree.DirectorySelected
+    ) -> None:
+        """Handle directory navigation in directory tree."""
+        # Update breadcrumb when directory changes
+        self.update_breadcrumb_path()
 
     def update_selection_display(self) -> None:
         """Update the selected files display."""
@@ -198,12 +319,24 @@ class FileSelectionScreen(Screen):
             count_label = self.query_one("#selected_count", Static)
             count_label.update("No files selected")
 
+    def update_breadcrumb_path(self) -> None:
+        """Update the breadcrumb path display."""
+        tree = self.query_one(NavigableDirectoryTree)
+        breadcrumb = self.query_one(PathBreadcrumb)
+        breadcrumb.update_path(tree.get_current_path())
+
     def action_select_file(self) -> None:
         """Toggle file selection."""
-        tree = self.query_one(DirectoryTree)
+        tree = self.query_one(NavigableDirectoryTree)
         if tree.cursor_node:
             # Simulate file selected event
             pass
+
+    def action_navigate_parent(self) -> None:
+        """Navigate to parent directory."""
+        tree = self.query_one(NavigableDirectoryTree)
+        if tree.navigate_to_parent():
+            self.update_breadcrumb_path()
 
     def action_clear_selection(self) -> None:
         """Clear all selected files."""
@@ -481,6 +614,15 @@ class SchwabTUI(App):
         text-align: center;
         color: $text-muted;
         padding-bottom: 1;
+    }
+
+    #path_breadcrumb {
+        background: $panel;
+        color: $accent;
+        padding: 0 1;
+        text-style: bold;
+        border: solid $primary;
+        margin-bottom: 1;
     }
 
     Horizontal {
