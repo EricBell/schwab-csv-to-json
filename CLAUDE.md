@@ -120,6 +120,31 @@ This project uses `uv` for Python dependency management. Python 3.11+ required.
 # Main dependency: click>=8.3.0
 ```
 
+## Packaging and Distribution
+
+**CRITICAL**: When adding new Python modules to the project, they MUST be added to the `py-modules` list in `pyproject.toml` to ensure they are included in the installed package.
+
+Current required modules in `pyproject.toml`:
+```toml
+[tool.setuptools]
+py-modules = ["main", "batch", "tui", "__version__"]
+```
+
+The `__version__.py` module is essential for the CLI tool to display version information. If it's missing from the package, users will get `ModuleNotFoundError` when running the installed tool.
+
+To test packaging locally:
+```bash
+# Install as a tool
+uv tool install .
+
+# Verify it works
+schwab-csv-to-json --version
+
+# If you make packaging changes, reinstall
+uv tool uninstall schwab-csv-to-json
+uv tool install .
+```
+
 ## Development Methodology
 
 **Use TDD (Test-Driven Development)** when adding new features or fixing bugs:

@@ -23,7 +23,7 @@ dev = [
 ]
 
 [tool.setuptools]
-py-modules = ["main", "batch", "tui"]
+py-modules = ["main", "batch", "tui", "__version__"]
 
 [project.scripts]
 schwab-csv-to-json = "main:cli"
