@@ -4,6 +4,7 @@
 
 import click
 import csv
+import glob
 import json
 import os
 import re
@@ -12,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 
-__version__ = "1.2.0"
+from __version__ import __version__
 
 # Column alias mapping - maps normalized header names to canonical field names
 COL_ALIASES = {
@@ -129,6 +130,43 @@ MONTH_MAP = {
     'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06',
     'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'
 }
+
+
+def expand_glob_patterns(patterns: List[str]) -> List[str]:
+    """
+    Expand glob patterns in file paths.
+
+    Takes a list of file paths which may contain glob patterns (*, ?, [])
+    and expands them to actual file paths. Non-glob patterns are passed through.
+
+    Args:
+        patterns: List of file path patterns (may contain globs)
+
+    Returns:
+        List of expanded file paths, sorted for consistency
+    """
+    if not patterns:
+        return []
+
+    expanded = []
+
+    for pattern in patterns:
+        # Check if pattern contains glob characters
+        if any(char in pattern for char in ['*', '?', '[']):
+            # Expand glob pattern
+            matches = glob.glob(pattern)
+            if matches:
+                # Sort matches for consistency
+                expanded.extend(sorted(matches))
+            else:
+                # No matches - keep original pattern
+                # (validation will catch non-existent files later)
+                expanded.append(pattern)
+        else:
+            # Literal filename - pass through
+            expanded.append(pattern)
+
+    return expanded
 
 
 def compile_section_patterns(patterns: Dict[str, str]) -> List[Tuple[re.Pattern, str]]:
@@ -1079,18 +1117,22 @@ def convert(input_csv, output_json, include_rolling, format_json, output_ndjson,
     Convert Schwab CSV trade activity reports to JSON/NDJSON format.
 
     Supports both single file and multi-file (batch) processing.
+    Supports glob patterns in input file paths (e.g., *Trade-Acti*.csv).
 
     INPUT_CSV: Path(s) to Schwab CSV file(s). Multiple files can be specified.
+                Can include glob patterns like *.csv or *Trade*.csv
     OUTPUT_JSON: Path to output file (.ndjson or .json)
 
     Examples:
         Single file:  main.py input.csv output.ndjson
         Multiple files: main.py file1.csv file2.csv file3.csv output.ndjson
+        Glob pattern: main.py *Trade-Acti*.csv output.ndjson
+        Mixed: main.py file1.csv *Trade*.csv output.ndjson
     """
     from batch import process_multiple_files, BatchOptions
 
-    # Convert input_csv tuple to list
-    input_files = list(input_csv)
+    # Convert input_csv tuple to list and expand glob patterns
+    input_files = expand_glob_patterns(list(input_csv))
 
     # Validate file paths before processing
     validation_errors = validate_file_paths(input_files, output_json, force_overwrite)

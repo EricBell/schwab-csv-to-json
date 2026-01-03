@@ -776,3 +776,129 @@ class TestStatusToEventTypeMapping:
 
         assert result is not None
         assert result['event_type'] == 'cancel'
+
+
+class TestExpandGlobPatterns:
+    """Test glob pattern expansion for input files."""
+
+    def test_expand_literal_filenames(self, tmp_path):
+        """Literal filenames should pass through unchanged."""
+        from main import expand_glob_patterns
+
+        # Create test files
+        file1 = tmp_path / "file1.csv"
+        file2 = tmp_path / "file2.csv"
+        file1.touch()
+        file2.touch()
+
+        patterns = [str(file1), str(file2)]
+        result = expand_glob_patterns(patterns)
+
+        assert len(result) == 2
+        assert str(file1) in result
+        assert str(file2) in result
+
+    def test_expand_glob_pattern_star(self, tmp_path):
+        """Glob pattern with * should expand to matching files."""
+        from main import expand_glob_patterns
+
+        # Create test files
+        (tmp_path / "trade1.csv").touch()
+        (tmp_path / "trade2.csv").touch()
+        (tmp_path / "other.csv").touch()
+
+        pattern = str(tmp_path / "trade*.csv")
+        result = expand_glob_patterns([pattern])
+
+        assert len(result) == 2
+        assert str(tmp_path / "trade1.csv") in result
+        assert str(tmp_path / "trade2.csv") in result
+        assert str(tmp_path / "other.csv") not in result
+
+    def test_expand_glob_pattern_question_mark(self, tmp_path):
+        """Glob pattern with ? should match single character."""
+        from main import expand_glob_patterns
+
+        # Create test files
+        (tmp_path / "file1.csv").touch()
+        (tmp_path / "file2.csv").touch()
+        (tmp_path / "file10.csv").touch()
+
+        pattern = str(tmp_path / "file?.csv")
+        result = expand_glob_patterns([pattern])
+
+        assert len(result) == 2
+        assert str(tmp_path / "file1.csv") in result
+        assert str(tmp_path / "file2.csv") in result
+        assert str(tmp_path / "file10.csv") not in result
+
+    def test_expand_glob_pattern_brackets(self, tmp_path):
+        """Glob pattern with [] should match character ranges."""
+        from main import expand_glob_patterns
+
+        # Create test files
+        (tmp_path / "file1.csv").touch()
+        (tmp_path / "file2.csv").touch()
+        (tmp_path / "file3.csv").touch()
+
+        pattern = str(tmp_path / "file[12].csv")
+        result = expand_glob_patterns([pattern])
+
+        assert len(result) == 2
+        assert str(tmp_path / "file1.csv") in result
+        assert str(tmp_path / "file2.csv") in result
+        assert str(tmp_path / "file3.csv") not in result
+
+    def test_expand_mixed_patterns_and_literals(self, tmp_path):
+        """Mix of glob patterns and literal filenames should work."""
+        from main import expand_glob_patterns
+
+        # Create test files
+        (tmp_path / "trade1.csv").touch()
+        (tmp_path / "trade2.csv").touch()
+        (tmp_path / "manual.csv").touch()
+
+        patterns = [
+            str(tmp_path / "trade*.csv"),
+            str(tmp_path / "manual.csv")
+        ]
+        result = expand_glob_patterns(patterns)
+
+        assert len(result) == 3
+        assert str(tmp_path / "trade1.csv") in result
+        assert str(tmp_path / "trade2.csv") in result
+        assert str(tmp_path / "manual.csv") in result
+
+    def test_expand_no_matches_returns_original(self, tmp_path):
+        """If glob pattern matches nothing, return original pattern."""
+        from main import expand_glob_patterns
+
+        pattern = str(tmp_path / "nonexistent*.csv")
+        result = expand_glob_patterns([pattern])
+
+        # Should return the original pattern (validation will catch non-existent files later)
+        assert len(result) == 1
+        assert result[0] == pattern
+
+    def test_expand_empty_list(self):
+        """Empty input should return empty list."""
+        from main import expand_glob_patterns
+
+        result = expand_glob_patterns([])
+        assert result == []
+
+    def test_expand_preserves_order(self, tmp_path):
+        """Results should be sorted for consistency."""
+        from main import expand_glob_patterns
+
+        # Create test files
+        (tmp_path / "file3.csv").touch()
+        (tmp_path / "file1.csv").touch()
+        (tmp_path / "file2.csv").touch()
+
+        pattern = str(tmp_path / "file*.csv")
+        result = expand_glob_patterns([pattern])
+
+        # glob.glob returns sorted results by default in Python 3.5+
+        assert len(result) == 3
+        assert result == sorted(result)

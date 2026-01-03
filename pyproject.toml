@@ -1,7 +1,7 @@
 [project]
 name = "schwab-csv-to-json"
 version = "1.2.0"
-description = "Add your description here"
+description = "Convert Schwab CSV trade activity reports to JSON/NDJSON format"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
