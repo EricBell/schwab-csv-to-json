@@ -147,6 +147,13 @@ Key TDD requirements for this feature:
 - Add integration tests for batch processing and TUI workflows
 - Never skip the red-green-refactor cycle
 
+## Version Management
+
+When making changes, update the version number in both `main.py` (`__version__`) and `pyproject.toml`:
+
+- **Minor version** (e.g., 1.1.0 → 1.2.0): New features or changes to existing features
+- **Patch version** (e.g., 1.1.0 → 1.1.1): Bug fixes only
+
 ## Important Implementation Details
 
 **Null Handling**: The code normalizes empty CSV cells to `None` early in processing. Always check if values are truthy before calling string methods like `.strip()` or using `in` operator to avoid `NoneType` errors.

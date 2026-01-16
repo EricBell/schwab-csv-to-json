@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 # Column alias mapping - maps normalized header names to canonical field names
 COL_ALIASES = {
