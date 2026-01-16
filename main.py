@@ -427,7 +427,8 @@ def build_order_record(
     header_map: Dict[str, int],
     cells: List[str],
     row_index: int,
-    qty_unsigned: bool = False
+    qty_unsigned: bool = False,
+    filter_triggered_rejected: bool = True
 ) -> Optional[Dict[str, Any]]:
     """
     Build order record from CSV row.
@@ -438,6 +439,7 @@ def build_order_record(
         cells: CSV row cells
         row_index: Row index in file
         qty_unsigned: If True, quantities are unsigned
+        filter_triggered_rejected: If True, filter out TRIGGERED and REJECTED rows
 
     Returns:
         Record dict with unified schema or None
@@ -479,6 +481,11 @@ def build_order_record(
         tif = tif.upper()
     if status:
         status = status.upper()
+
+    # Filter out TRIGGERED and REJECTED status rows (non-trade rows)
+    if filter_triggered_rejected and status:
+        if status == 'TRIGGERED' or status.startswith('REJECTED'):
+            return None
 
     # Skip rows with no meaningful data
     if not side and not qty_str and not symbol and not type_str:
@@ -625,7 +632,8 @@ def parse_file(
     max_rows: int = None,
     qty_unsigned: bool = False,
     verbose: bool = False,
-    skip_empty_sections: bool = False
+    skip_empty_sections: bool = False,
+    filter_triggered_rejected: bool = True
 ) -> Tuple[List[Dict[str, Any]], int]:
     """
     Parse Schwab CSV file to records.
@@ -638,6 +646,7 @@ def parse_file(
         qty_unsigned: Parse quantities as unsigned
         verbose: Enable verbose logging
         skip_empty_sections: Skip sections with only headers (no data rows)
+        filter_triggered_rejected: Filter out TRIGGERED and REJECTED status rows
 
     Returns:
         Tuple of (list of record dicts, count of skipped sections)
@@ -809,7 +818,7 @@ def parse_file(
                 results.append(build_amendment_record(section, cells, row_index))
                 continue
 
-            rec = build_order_record(section, current_header_map, cells, row_index, qty_unsigned)
+            rec = build_order_record(section, current_header_map, cells, row_index, qty_unsigned, filter_triggered_rejected)
             if rec:
                 results.append(rec)
 
@@ -1058,12 +1067,14 @@ def cli():
               help='Skip sections with no data rows (default: skip)')
 @click.option('--group-by-section/--preserve-file-order', default=True,
               help='Group records by section across files and sort by time (default: group)')
+@click.option('--filter-triggered-rejected/--include-all-statuses', default=True,
+              help='Filter out TRIGGERED and REJECTED status rows (default: filter)')
 @click.option('--force-overwrite', is_flag=True, help='Force overwrite without safety checks (use with caution)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
 @click.option('--encoding', default='utf-8', help='CSV file encoding (default: utf-8)')
 def convert(input_csv, output_json, include_rolling, format_json, output_ndjson, pretty,
          preview, section_patterns_file, max_rows, qty_unsigned, qty_signed,
-         skip_empty_sections, group_by_section, force_overwrite, verbose, encoding):
+         skip_empty_sections, group_by_section, filter_triggered_rejected, force_overwrite, verbose, encoding):
     """
     Convert Schwab CSV trade activity reports to JSON/NDJSON format.
 
@@ -1128,7 +1139,8 @@ def convert(input_csv, output_json, include_rolling, format_json, output_ndjson,
             qty_unsigned=qty_unsigned,
             verbose=verbose,
             skip_empty_sections=skip_empty_sections,
-            group_by_section=group_by_section
+            group_by_section=group_by_section,
+            filter_triggered_rejected=filter_triggered_rejected
         )
 
         # Progress callback for verbose mode
@@ -1183,7 +1195,8 @@ def convert(input_csv, output_json, include_rolling, format_json, output_ndjson,
             max_rows=max_rows,
             qty_unsigned=qty_unsigned,
             verbose=verbose,
-            skip_empty_sections=skip_empty_sections
+            skip_empty_sections=skip_empty_sections,
+            filter_triggered_rejected=filter_triggered_rejected
         )
 
         # Validate records

@@ -1,0 +1,38 @@
+﻿This document was exported from the paperMoney® platform which provides a simulated trading environment. All data contained herein is for educational and entertainment purposes only. TD Ameritrade its subsidiaries and/or affiliates are not responsible for the accuracy of any of these exported data.
+
+Today's Trade Activity for D-67336185 (margin) on 1/9/26 18:45:16
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,1/9/26 11:10:45,SINGLE,SELL,-1,TO CLOSE,SPY,9 JAN 26,694,CALL,.44,.44,.00,MKT
+,,1/9/26 11:09:30,SINGLE,SELL,-1,TO CLOSE,SNDK,9 JAN 26,372.5,CALL,3.70,3.70,.00,TRSTP
+,,1/9/26 11:02:21,SINGLE,BUY,+1,TO OPEN,SNDK,9 JAN 26,372.5,CALL,3.20,3.20,.00,MKT
+,,1/9/26 10:39:50,SINGLE,BUY,+1,TO OPEN,SPY,9 JAN 26,694,CALL,.52,.52,.00,MKT
+,,1/9/26 10:25:28,STOCK,SELL,-900,TO CLOSE,INBS,,,STOCK,17.14,17.14,.00,STP
+,,1/9/26 10:20:06,STOCK,BUY,+900,TO OPEN,INBS,,,STOCK,17.81,17.81,.00,LMT
+,,1/9/26 10:03:45,SINGLE,SELL,-2,TO CLOSE,SPY,9 JAN 26,692,CALL,1.07,1.07,.00,STP
+,,1/9/26 09:44:23,SINGLE,BUY,+2,TO OPEN,SPY,9 JAN 26,692,CALL,1.65,1.65,.00,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,1/9/26 11:10:45,SINGLE,SELL,-100%,TO CLOSE,SPY,9 JAN 26,694,CALL,~,MKT,DAY,TRIGGERED
+,,1/9/26 11:08:00,SINGLE,SELL,-1,TO CLOSE,SNDK,9 JAN 26,372.5,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,1.20,STP,STD,
+,,1/9/26 11:10:45,SINGLE,SELL,-1,TO CLOSE,SPY,9 JAN 26,694,CALL,~,MKT,DAY,CANCELED
+,,,RE #5284932973,,,,,,,,.16,STP,STD,
+,,1/9/26 10:48:14,SINGLE,SELL,-1,TO CLOSE,SPY,9 JAN 26,694,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.18,STP,STD,
+,,1/9/26 09:46:01,SINGLE,SELL,-2,TO CLOSE,SPY,9 JAN 26,692,CALL,~,MKT,DAY,CANCELED
+,,,RE #5284775543,,,,,,,,1.21,STP,STD,
+,,1/9/26 09:45:59,SINGLE,SELL,-2,TO CLOSE,SPY,9 JAN 26,692,CALL,~,MKT,DAY,CANCELED
+,,,RE #5284775543,,,,,,,,1.24,STP,STD,
+,,1/9/26 09:45:57,SINGLE,SELL,-2,TO CLOSE,SPY,9 JAN 26,692,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,1.30,STP,STD,
+,,1/9/26 09:44:24,SINGLE,BUY,+2,TO OPEN,SPY,9 JAN 26,692,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,1.82,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

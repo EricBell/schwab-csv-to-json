@@ -1,0 +1,56 @@
+﻿Today's Trade Activity for 70445085SCHW (Individual) on 1/8/26 22:10:54
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,1/8/26 10:54:43,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,690,CALL,.48,.48,-,STP
+,,1/8/26 10:46:39,SINGLE,BUY,+1,TO OPEN,SPY,8 JAN 26,690,CALL,.81,.81,-,MKT
+,,1/8/26 10:22:30,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,1.36,1.36,-,STP
+,,1/8/26 10:11:39,SINGLE,BUY,+1,TO OPEN,SPY,8 JAN 26,689,CALL,1.36,1.36,2.00,MKT
+,,1/8/26 10:04:15,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,.79,.79,-,MKT
+,,1/8/26 09:57:26,SINGLE,BUY,+1,TO OPEN,SPY,8 JAN 26,689,CALL,.93,.93,-,LMT
+,,1/8/26 09:52:41,SINGLE,SELL,-1,TO CLOSE,BE,9 JAN 26,130,CALL,1.77,1.77,17.00,MKT
+,,1/8/26 09:50:36,SINGLE,BUY,+1,TO OPEN,BE,9 JAN 26,130,CALL,2.54,2.54,16.00,LMT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,1/8/26 10:48:20,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,690,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.46,STP,STD,
+,,1/8/26 10:19:22,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,CANCELED
+,,,RE #1005083753996,,,,,,,,1.48,STP,STD,
+,,1/8/26 10:19:13,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,CANCELED
+,,,RE #1005083753868,,,,,,,,1.11,STP,STD,
+,,1/8/26 10:12:43,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,,,,,,,,,,1.20,STP,STD,
+,,1/8/26 10:13:32,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,CANCELED
+,,,RE #1005083753854,,,,,,,,1.20,STP,STD,
+,,1/8/26 10:12:43,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,CANCELED
+,,,RE #1005083753786,,,,,,,,1.32,STP,STD,
+,,1/8/26 10:12:32,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.99,STP,STD,
+,,1/8/26 10:04:11,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,1/8/26 10:04:14,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,CANCELED
+,,,RE #1005083752595,,,,,,,,.69,STP,STD,
+,,,OCO #1005083752554,,,,,,,,,,,
+,,1/8/26 10:00:11,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,CANCELED
+,,,RE #1005083752560,,,,,,,,.75,STP,STD,
+,,,OCO #1005083752554,,,,,,,,,,,
+,,1/8/26 10:04:14,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,1.17,LMT,DAY,CANCELED
+,,,RE #1005083752555,,,,,,,,,,,
+,,,OCO #1005083752554,,,,,,,,,,,
+,,1/8/26 09:59:59,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,CANCELED
+,,,RE #1005083752556,,,,,,,,.77,STP,STD,
+,,,OCO #1005083752554,,,,,,,,,,,
+,,1/8/26 09:59:47,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,1.07,LMT,DAY,CANCELED
+,,,OCO #1005083752554,,,,,,,,,,,
+,,1/8/26 09:59:43,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,CANCELED
+,,,OCO #1005083752554,,,,,,,,.84,STP,STD,
+,,1/8/26 09:59:48,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,1.17,LMT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,,OCO #1005083752574,,,,,,,,,,,
+,,1/8/26 09:59:48,SINGLE,SELL,-1,TO CLOSE,SPY,8 JAN 26,689,CALL,~,MKT,DAY,REJECTED: This order may result in an oversold/overbought position in your account.  Please check your position quantity and/or open orders.
+,,,OCO #1005083752574,,,,,,,,.79,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

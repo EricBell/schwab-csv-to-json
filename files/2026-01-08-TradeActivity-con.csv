@@ -1,0 +1,20 @@
+﻿Today's Trade Activity for 79967586SCHW (Contributory IRA) on 1/8/26 22:11:14
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,1/8/26 09:39:05,STOCK,SELL,-50,TO CLOSE,FLYX,,,STOCK,6.37,6.37,-,MKT
+,,1/8/26 09:38:42,STOCK,SELL,-50,TO CLOSE,FLYX,,,STOCK,6.25,6.25,-,LMT
+,,1/8/26 09:37:56,STOCK,BUY,+100,TO OPEN,FLYX,,,STOCK,5.9899,5.9899,.01,MKT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,1/8/26 09:38:42,STOCK,SELL,-50,TO CLOSE,FLYX,,,STOCK,~,MKT,DAY,CANCELED
+,,,OCO #1005082095666,,,,,,,,6.13,STP,STD,
+,,1/8/26 09:38:34,STOCK,SELL,-100,TO CLOSE,FLYX,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,5.58,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

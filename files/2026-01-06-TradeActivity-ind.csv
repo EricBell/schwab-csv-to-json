@@ -1,0 +1,18 @@
+﻿Today's Trade Activity for 70445085SCHW (Individual) on 1/6/26 19:48:19
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,1/6/26 14:00:44,SINGLE,SELL,-1,TO CLOSE,SPY,6 JAN 26,692,CALL,.33,.33,1.00,MKT
+,,1/6/26 13:55:26,SINGLE,BUY,+1,TO OPEN,SPY,6 JAN 26,692,CALL,.22,.22,-,LMT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,1/6/26 14:00:23,SINGLE,SELL,-1,TO CLOSE,SPY,6 JAN 26,692,CALL,~,MKT,DAY,CANCELED
+,,,,,,,,,,,.12,STP,STD,
+,,1/6/26 13:54:55,SINGLE,BUY,+1,TO OPEN,SPY,6 JAN 26,692,CALL,.20,LMT,DAY,CANCELED
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

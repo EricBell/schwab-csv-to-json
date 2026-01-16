@@ -554,6 +554,121 @@ class TestSectionNameNormalization:
         assert normalize_section_name(None) is None
 
 
+class TestStatusFiltering:
+    """Test filtering of TRIGGERED and REJECTED status rows."""
+
+    def test_filter_triggered_status(self):
+        """TRIGGERED status rows should be filtered out by default."""
+        from main import build_order_record
+
+        section = 'Account Order History'
+        header_map = {
+            'time_placed': 2, 'side': 4, 'qty': 5,
+            'symbol': 7, 'type': 10, 'status': 14
+        }
+        cells = ['', '', '1/15/26 15:17:27', 'SINGLE', 'BUY', '100%',
+                 'TO CLOSE', 'SPY', '15 JAN 26', '693', 'PUT', '~',
+                 'MKT', 'DAY', 'TRIGGERED']
+
+        result = build_order_record(section, header_map, cells, 1,
+                                    filter_triggered_rejected=True)
+
+        assert result is None  # Row should be filtered out
+
+    def test_filter_rejected_status(self):
+        """REJECTED status rows should be filtered out by default."""
+        from main import build_order_record
+
+        section = 'Account Order History'
+        header_map = {
+            'time_placed': 2, 'side': 4, 'qty': 5,
+            'symbol': 7, 'type': 10, 'status': 14
+        }
+        cells = ['', '', '12/3/25 09:50:44', 'STOCK', 'SELL', '-80',
+                 'TO CLOSE', 'IRBT', '', '', 'STOCK', '~',
+                 'MKT', 'DAY', 'REJECTED']
+
+        result = build_order_record(section, header_map, cells, 1,
+                                    filter_triggered_rejected=True)
+
+        assert result is None
+
+    def test_filter_rejected_with_message(self):
+        """REJECTED: with detailed message should be filtered out."""
+        from main import build_order_record
+
+        section = 'Account Order History'
+        header_map = {
+            'time_placed': 2, 'side': 4, 'qty': 5,
+            'symbol': 7, 'type': 10, 'status': 14
+        }
+        cells = ['', '', '12/3/25 09:50:44', 'STOCK', 'SELL', '-80',
+                 'TO CLOSE', 'IRBT', '', '', 'STOCK', '~',
+                 'MKT', 'DAY',
+                 'REJECTED: Your buying power will be below zero...']
+
+        result = build_order_record(section, header_map, cells, 1,
+                                    filter_triggered_rejected=True)
+
+        assert result is None
+
+    def test_include_triggered_when_filter_disabled(self):
+        """TRIGGERED rows should be included when filtering is disabled."""
+        from main import build_order_record
+
+        section = 'Account Order History'
+        header_map = {
+            'time_placed': 2, 'side': 4, 'qty': 5,
+            'symbol': 7, 'type': 10, 'status': 14
+        }
+        cells = ['', '', '1/15/26 15:17:27', 'SINGLE', 'BUY', '+1',
+                 'TO CLOSE', 'SPY', '15 JAN 26', '693', 'PUT', '~',
+                 'MKT', 'DAY', 'TRIGGERED']
+
+        result = build_order_record(section, header_map, cells, 1,
+                                    filter_triggered_rejected=False)
+
+        assert result is not None
+        assert result['status'] == 'TRIGGERED'
+
+    def test_normal_status_not_filtered(self):
+        """CANCELED and FILLED status should not be filtered."""
+        from main import build_order_record
+
+        section = 'Account Order History'
+        header_map = {
+            'time_placed': 2, 'side': 4, 'qty': 5,
+            'symbol': 7, 'type': 10, 'status': 14
+        }
+        cells = ['', '', '1/15/26 15:16:07', 'SINGLE', 'SELL', '-2',
+                 'TO OPEN', 'SPY', '15 JAN 26', '693', 'PUT', '~',
+                 'MKT', 'DAY', 'CANCELED']
+
+        result = build_order_record(section, header_map, cells, 1,
+                                    filter_triggered_rejected=True)
+
+        assert result is not None
+        assert result['status'] == 'CANCELED'
+
+    def test_filter_defaults_to_true(self):
+        """Default behavior should filter TRIGGERED/REJECTED rows."""
+        from main import build_order_record
+
+        section = 'Account Order History'
+        header_map = {
+            'time_placed': 2, 'side': 4, 'qty': 5,
+            'symbol': 7, 'type': 10, 'status': 14
+        }
+        cells = ['', '', '1/15/26 15:17:27', 'SINGLE', 'BUY', '+1',
+                 'TO CLOSE', 'SPY', '15 JAN 26', '693', 'PUT', '~',
+                 'MKT', 'DAY', 'TRIGGERED']
+
+        # Call without filter_triggered_rejected parameter (should default to True)
+        result = build_order_record(section, header_map, cells, 1)
+
+        assert result is None  # Should be filtered by default
+
+
 class TestStatusToEventTypeMapping:
     """Test that status field is properly mapped to event_type."""
 
@@ -602,7 +717,9 @@ class TestStatusToEventTypeMapping:
         }
         cells = ['', '', 'BUY', '100', 'AAPL', 'STOCK', 'REJECTED']
 
-        result = build_order_record(section, header_map, cells, 1, qty_unsigned=False)
+        # Disable filtering to test event_type mapping
+        result = build_order_record(section, header_map, cells, 1, qty_unsigned=False,
+                                    filter_triggered_rejected=False)
 
         assert result is not None
         assert result['status'] == 'REJECTED'
@@ -620,7 +737,9 @@ class TestStatusToEventTypeMapping:
         cells = ['', '', 'BUY', '100', 'AAPL', 'STOCK',
                  'REJECTED: THIS ORDER MAY RESULT IN AN OVERSOLD/OVERBOUGHT POSITION...']
 
-        result = build_order_record(section, header_map, cells, 1, qty_unsigned=False)
+        # Disable filtering to test event_type mapping
+        result = build_order_record(section, header_map, cells, 1, qty_unsigned=False,
+                                    filter_triggered_rejected=False)
 
         assert result is not None
         assert result['status'].startswith('REJECTED:')

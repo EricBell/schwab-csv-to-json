@@ -1,0 +1,54 @@
+﻿Today's Trade Activity for 79967586SCHW (Contributory IRA) on 1/6/26 19:48:05
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,1/6/26 12:05:16,STOCK,BUY,+140,TO OPEN,INDI,,,STOCK,3.98,3.98,-,LMT
+,,1/6/26 10:47:17,STOCK,SELL,-50,TO CLOSE,WOLF,,,STOCK,19.41,19.41,-,STP
+,,1/6/26 10:39:37,STOCK,SELL,-50,TO CLOSE,WOLF,,,STOCK,19.65,19.65,-,LMT
+,,1/6/26 10:29:09,STOCK,BUY,+100,TO OPEN,WOLF,,,STOCK,19.44,19.44,-,LMT
+,,1/6/26 09:43:09,STOCK,SELL,-100,TO CLOSE,ALMS,,,STOCK,19.61,19.61,-,STP
+,,1/6/26 09:41:16,STOCK,BUY,+100,TO OPEN,ALMS,,,STOCK,19.99,19.99,-,STP
+,,1/6/26 09:38:17,STOCK,SELL,-90,TO CLOSE,ALMS,,,STOCK,19.39,19.39,-,MKT
+,,1/6/26 09:38:17,STOCK,SELL,-10,TO CLOSE,ALMS,,,STOCK,19.39,19.39,-,MKT
+,,1/6/26 09:37:56,STOCK,BUY,+100,TO OPEN,ALMS,,,STOCK,19.95,19.95,-,LMT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,1/6/26 13:12:11,STOCK,BUY,+300,TO OPEN,PSNL,,,STOCK,8.51,LMT,DAY,CANCELED
+,,1/6/26 12:05:40,STOCK,BUY,+300,TO OPEN,INDI,,,STOCK,3.98,LMT,DAY,(+160) CANCELED
+,,1/6/26 10:47:17,STOCK,SELL,-50,TO CLOSE,WOLF,,,STOCK,19.95,LMT,DAY,CANCELED
+,,,RE #1005061087691,,,,,,,,,,,
+,,,OCO #1005061087674,,,,,,,,,,,
+,,1/6/26 10:33:55,STOCK,SELL,-50,TO CLOSE,WOLF,,,STOCK,19.88,LMT,DAY,CANCELED
+,,,RE #1005061087675,,,,,,,,,,,
+,,,OCO #1005061087674,,,,,,,,,,,
+,,1/6/26 10:40:08,STOCK,SELL,-50,TO CLOSE,WOLF,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1005061087676,,,,,,,,19.19,STP,STD,
+,,,OCO #1005061087674,,,,,,,,,,,
+,,1/6/26 10:33:52,STOCK,SELL,-50,TO CLOSE,WOLF,,,STOCK,19.72,LMT,DAY,CANCELED
+,,,OCO #1005061087674,,,,,,,,,,,
+,,1/6/26 10:33:46,STOCK,SELL,-50,TO CLOSE,WOLF,,,STOCK,~,MKT,DAY,CANCELED
+,,,OCO #1005061087674,,,,,,,,19.33,STP,STD,
+,,1/6/26 10:39:37,STOCK,SELL,-50,TO CLOSE,WOLF,,,STOCK,~,MKT,DAY,CANCELED
+,,,RE #1005061087659,,,,,,,,19.19,STP,STD,
+,,,OCO #1005061087657,,,,,,,,,,,
+,,1/6/26 10:33:37,STOCK,SELL,-50,TO CLOSE,WOLF,,,STOCK,19.56,LMT,DAY,CANCELED
+,,,OCO #1005061087657,,,,,,,,,,,
+,,1/6/26 10:33:34,STOCK,SELL,-50,TO CLOSE,WOLF,,,STOCK,~,MKT,DAY,CANCELED
+,,,OCO #1005061087657,,,,,,,,19.33,STP,STD,
+,,1/6/26 10:33:27,STOCK,SELL,-100,TO CLOSE,WOLF,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,19.19,STP,STD,
+,,1/6/26 09:35:22,STOCK,BUY,+300,TO OPEN,AZI,,,STOCK,~,MKT,DAY,REJECTED: Opening transactions for this security must be placed with a broker. Contact us
+,,,,,,,,,,,3.23,STP,STD,
+,,1/6/26 09:34:52,STOCK,BUY,+300,TO OPEN,AZI,,,STOCK,~,MKT,DAY,REJECTED: Opening transactions for this security must be placed with a broker. Contact us
+,,,,,,,,,,,3.23,STP,STD,
+,,1/6/26 09:34:46,STOCK,BUY,+300,TO OPEN,AZI,,,STOCK,3.23,LMT,DAY,REJECTED: Opening transactions for this security must be placed with a broker. Contact us
+,,,OCO #1005059268181,,,,,,,,,,,
+,,1/6/26 09:34:46,STOCK,BUY,+300,TO OPEN,AZI,,,STOCK,~,MKT,DAY,REJECTED: Opening transactions for this security must be placed with a broker. Contact us
+,,,OCO #1005059268181,,,,,,,,3.20,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

@@ -1,0 +1,37 @@
+﻿This document was exported from the paperMoney® platform which provides a simulated trading environment. All data contained herein is for educational and entertainment purposes only. TD Ameritrade its subsidiaries and/or affiliates are not responsible for the accuracy of any of these exported data.
+
+Today's Trade Activity for D-67336185 (margin) on 1/13/26 16:06:12
+
+Working Orders
+Notes,,Time Placed,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Mark,Status
+
+Filled Orders
+,,Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Price Improvement,Order Type
+,,1/13/26 15:22:36,SINGLE,BUY,+2,TO CLOSE,SPY,13 JAN 26,692,PUT,.25,.25,.00,MKT
+,,1/13/26 15:21:51,SINGLE,SELL,-1,TO OPEN,SPY,13 JAN 26,692,PUT,.28,.28,.00,MKT
+,,1/13/26 15:19:07,SINGLE,SELL,-1,TO OPEN,SPY,13 JAN 26,692,PUT,.19,.19,.00,MKT
+,,1/13/26 10:03:28,STOCK,SELL,-75,TO CLOSE,XAIR,,,STOCK,2.15,2.15,.00,MKT
+,,1/13/26 10:03:01,STOCK,SELL,-50,TO CLOSE,XAIR,,,STOCK,2.22,2.22,.00,LMT
+,,1/13/26 09:58:54,STOCK,SELL,-125,TO CLOSE,XAIR,,,STOCK,1.89,1.89,.00,LMT
+,,1/13/26 09:52:11,STOCK,SELL,-250,TO CLOSE,XAIR,,,STOCK,1.70,1.70,.00,MKT
+,,1/13/26 09:47:10,STOCK,BUY,+500,TO OPEN,XAIR,,,STOCK,1.555,1.555,.00,LMT
+
+Canceled Orders
+Notes,,Time Canceled,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,PRICE,,TIF,Status
+,,1/13/26 15:35:24,SINGLE,BUY,+2,TO OPEN,NVDA,16 JAN 26,185,PUT,~,MKT,DAY,CANCELED
+,,,RE #5286474978,,,,,,,,2.78,STP,STD,
+,,1/13/26 15:35:04,SINGLE,BUY,+2,TO OPEN,NVDA,16 JAN 26,185,PUT,~,MKT,DAY,CANCELED
+,,,,,,,,,,,2.69,STP,STD,
+,,1/13/26 15:22:35,SINGLE,BUY,100%,TO CLOSE,SPY,13 JAN 26,692,PUT,~,MKT,DAY,TRIGGERED
+,,1/13/26 15:21:49,SINGLE,SELL,-1,TO OPEN,SPY,13 JAN 26,692,PUT,~,MKT,DAY,CANCELED
+,,,RE #5286462393,,,,,,,,MARK-.10,TR,MARK,
+,,,OCO #5286462391,,,,,,,,.20,STP,,
+,,1/13/26 15:21:36,SINGLE,SELL,-1,TO OPEN,SPY,13 JAN 26,692,PUT,~,MKT,DAY,CANCELED
+,,,OCO #5286462391,,,,,,,,.13,STP,STD,
+,,1/13/26 15:21:50,SINGLE,SELL,-1,TO OPEN,SPY,13 JAN 26,692,PUT,.33,LMT,DAY,CANCELED
+,,,OCO #5286462391,,,,,,,,,,,
+,,1/13/26 10:03:00,STOCK,SELL,-125,TO CLOSE,XAIR,,,STOCK,~,MKT,DAY,CANCELED
+,,,,,,,,,,,1.70,STP,STD,
+
+Rolling Strategies
+Covered Call Position,New Exp,Call By,Begin (Days),Order Price,Active Time,Move to MKT Time,Status

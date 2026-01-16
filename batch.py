@@ -39,6 +39,9 @@ class BatchOptions:
     group_by_section: bool = True
     """Group records by section across files and sort by time."""
 
+    filter_triggered_rejected: bool = True
+    """Filter out rows with TRIGGERED or REJECTED status."""
+
 
 @dataclass
 class FileProgress:
@@ -357,7 +360,8 @@ def process_single_file_for_batch(
         max_rows=options.max_rows,
         qty_unsigned=options.qty_unsigned,
         verbose=options.verbose,
-        skip_empty_sections=options.skip_empty_sections
+        skip_empty_sections=options.skip_empty_sections,
+        filter_triggered_rejected=options.filter_triggered_rejected
     )
 
     # Add source file metadata to each record
